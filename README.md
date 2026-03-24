@@ -1,268 +1,225 @@
-# OpenClaw 一键恢复脚本
+# OpenClaw Recovery 一键恢复工具
 
-> ⚠️ **重要提醒**: 此脚本仅供**新虚拟机环境**使用，禁止在当前生产环境测试！
+> ⚠️ **重要提醒**: 此工具专为**新虚拟机环境**设计，在已配置环境中执行可能覆盖现有配置！
 
-在全新的 Ubuntu 虚拟机环境中，基于国内网络条件，一键恢复 OpenClaw 的完整配置环境。
+---
 
 ## 快速开始
 
 ```bash
 # 1. 克隆项目
-git clone <repo-url> openclaw-recovery
+git clone https://github.com/JunJunHub/openclaw-recovery.git
 cd openclaw-recovery
 
 # 2. 配置敏感信息
 cp config/secrets.env.example config/secrets.env
 nano config/secrets.env  # 填入真实值
 
-# 3. 执行一键安装（默认社区版）
-chmod +x scripts/install.sh
-./scripts/install.sh --all
+# 3. 环境检测（推荐先执行）
+./scripts/install.sh --check
 
-# 或安装原版 OpenClaw
-./scripts/install.sh --all --version original
+# 4. 一键安装
+./scripts/install.sh --all
 ```
 
-## 版本选择
+---
 
-支持两种 OpenClaw 版本：
+## 使用说明
+
+### 命令参数
+
+```bash
+./scripts/install.sh [选项]
+```
+
+| 参数 | 说明 |
+|------|------|
+| `--all` | 执行所有安装阶段 |
+| `--stage <name>` | 执行指定阶段 |
+| `--version <type>` | 选择 OpenClaw 版本 |
+| `--check` | 仅检测环境，不执行安装 |
+| `--interactive` | 交互式输入敏感信息 |
+| `-h, --help` | 显示帮助信息 |
+
+### 版本选择
 
 | 参数 | 包名 | 说明 |
 |------|------|------|
-| `--version cn` | openclaw-cn | 社区版（默认），飞书/钉钉/企微开箱即用 |
-| `--version original` | openclaw | 原版，功能最新，需手动配置渠道 |
+| `--version cn` | openclaw-cn@latest | 社区版（默认），飞书/钉钉/企微内置 |
+| `--version original` | openclaw@latest | 原版，功能最新 |
 
-**社区版 vs 原版差异**：
+### 使用示例
 
-| 功能 | 社区版 | 原版 |
-|------|--------|------|
-| 飞书/钉钉/企微/QQ | ✅ 内置 | ❌ 需手动配置 |
-| 最新功能 | 稍有延迟 | ✅ 首发 |
-| Chrome MCP | ❌ | ✅ |
-| 国内网络适配 | ✅ | 需配置代理 |
+```bash
+# 环境检测
+./scripts/install.sh --check
 
-## 系统要求
+# 一键安装（社区版）
+./scripts/install.sh --all
 
-- **操作系统**: Ubuntu 22.04/24.04 LTS
-- **权限**: 需要 sudo 权限安装系统依赖
-- **网络**: 国内网络环境
+# 一键安装（原版）
+./scripts/install.sh --all --version original
 
-## 安装内容
+# 单独安装某个阶段
+./scripts/install.sh --stage node
+./scripts/install.sh --stage chrome
+
+# 交互式输入敏感信息
+./scripts/install.sh --all --interactive
+```
+
+---
+
+## 安装阶段清单
+
+| 阶段 | 命令 | 安装内容 | 风险等级 |
+|------|------|---------|---------|
+| 01 | `--stage system` | 系统依赖 + SSH 服务 | 🟢 低 |
+| 02 | `--stage node` | NVM + Node.js v24 | 🟢 低 |
+| 03 | `--stage chrome` | Google Chrome | 🟢 低 |
+| 04 | `--stage openclaw` | OpenClaw CLI | 🟡 中（覆盖安装需确认）|
+| 05 | `--stage config` | 配置文件恢复 | 🔴 高（覆盖配置）|
+| 06 | `--stage workspaces` | 工作空间初始化 | 🟢 低 |
+| 07 | `--stage verify` | 安装验证测试 | 🟢 低 |
+| 08 | `--stage dev-tools` | Claude Code + GitHub CLI | 🟡 中（覆盖安装需确认）|
+| 09 | `--stage file-sharing` | Samba 文件共享 | 🔴 高（修改 smb.conf）|
+| 10 | `--stage obsidian` | Obsidian AppImage | 🟢 低 |
+
+---
+
+## 支持恢复的配置清单
 
 ### 系统工具
 
-| 工具 | 用途 |
-|------|------|
-| curl / wget | 网络下载 |
-| git / vim | 版本控制 + 编辑器 |
-| net-tools | ifconfig 网络配置 |
-| htop | 进程监控 |
-| tmux | 终端复用 |
-| jq | JSON 处理 |
-| openssh-server | SSH 远程登录 |
+| 工具 | 用途 | 阶段 |
+|------|------|------|
+| curl | HTTP 客户端 | system |
+| wget | 文件下载 | system |
+| git | 版本控制 | system |
+| vim | 文本编辑器 | system |
+| jq | JSON 处理 | system |
+| build-essential | 编译工具链 | system |
+| net-tools | 网络配置 (ifconfig) | system |
+| htop | 进程监控 | system |
+| tmux | 终端复用 | system |
+| openssh-server | SSH 远程登录 | system |
+| open-vm-tools | VMware 增强工具 | system |
+| cifs-utils | 挂载 Windows 共享 | system |
+| samba | 共享文件夹给 Windows | system |
 
-### 虚拟机工具
+### 开发环境
 
-| 工具 | 用途 |
-|------|------|
-| open-vm-tools | VMware 增强工具 |
-| open-vm-tools-desktop | VMware 桌面增强（剪贴板、共享文件夹等）|
+| 组件 | 版本 | 阶段 |
+|------|------|------|
+| NVM | 0.40.1 | node |
+| Node.js | v24.14.0 | node |
+| npm | 淘宝镜像 | node |
+| Google Chrome | 最新稳定版 | chrome |
 
-### 编程工具
+### OpenClaw 核心
 
-| 工具 | 用途 |
-|------|------|
-| Claude Code CLI | AI 编程助手 |
-| GitHub CLI | GitHub 命令行工具 |
+| 组件 | 说明 | 阶段 |
+|------|------|------|
+| OpenClaw CLI | 主程序（社区版/原版可选）| openclaw |
+| openclaw.json | 配置文件（从模板恢复）| config |
+| 工作空间 | 5 个 Agent 工作空间 | workspaces |
 
-### 文件共享工具
+### 配置文件恢复
 
-| 工具 | 用途 |
-|------|------|
-| cifs-utils | 挂载 Windows 共享文件夹 |
-| Samba | 共享文件夹给 Windows |
+| 文件 | 路径 | 说明 |
+|------|------|------|
+| openclaw.json | ~/.openclaw/openclaw.json | OpenClaw 主配置 |
+| secrets.env | config/secrets.env | 敏感信息（需手动配置）|
+
+**配置模板变量**：
+
+| 变量 | 说明 | 来源 |
+|------|------|------|
+| `{{SILICONFLOW_API_KEY}}` | SiliconFlow API Key | https://cloud.siliconflow.cn |
+| `{{BAIDU_QIANFAN_API_KEY}}` | 百度千帆 API Key | https://console.bce.baidu.com/qianfan |
+| `{{FEISHU_APP_ID}}` | 飞书应用 ID | https://open.feishu.cn/app |
+| `{{FEISHU_APP_SECRET}}` | 飞书应用密钥 | https://open.feishu.cn/app |
+| `{{GATEWAY_TOKEN}}` | Gateway 认证令牌 | 自动生成或手动指定 |
+
+### 工作空间
+
+| 工作空间 | 路径 | 用途 |
+|---------|------|------|
+| main | ~/.openclaw/workspace | 主 Agent |
+| thinker | ~/.openclaw/workspace-thinker | 技术调研 |
+| media | ~/.openclaw/workspace-media | 内容创作 |
+| monitor | ~/.openclaw/workspace-monitor | 监控调度 |
+| coder | ~/.openclaw/workspace-coder | 开发实现 |
+
+每个工作空间自动创建：
+- `AGENTS.md` - 工作空间说明
+- `SOUL.md` - Agent 人格定义
+- `USER.md` - 用户信息
+- `MEMORY.md` - 长期记忆
+- `memory/` - 日志目录
+
+### 开发工具
+
+| 工具 | 说明 | 阶段 |
+|------|------|------|
+| Claude Code CLI | AI 编程助手 | dev-tools |
+| GitHub CLI | Git 命令行工具 | dev-tools |
+
+### 文件共享
+
+| 配置 | 路径/命令 | 说明 |
+|------|----------|------|
+| 共享目录 | /home/Share | 共享给 Windows |
+| 挂载点 | /home/mnt/win | 挂载 Windows 共享 |
+| 挂载脚本 | ~/mount-win.sh | 挂载 Windows 共享 |
+| 卸载脚本 | ~/unmount-win.sh | 卸载 Windows 共享 |
+| Samba 配置 | /etc/samba/smb.conf | 自动添加 [Share] 配置 |
 
 ### 桌面应用
 
-| 应用 | 说明 |
-|------|------|
-| Obsidian | 笔记应用 (AppImage) |
+| 应用 | 安装位置 | 阶段 |
+|------|---------|------|
+| Obsidian | ~/Applications/Obsidian.AppImage | obsidian |
+| 启动脚本 | ~/.local/bin/obsidian | obsidian |
+| 桌面快捷方式 | 应用菜单 → Obsidian | obsidian |
 
-### 核心组件
+---
 
-| 组件 | 版本 | 说明 |
-|------|------|------|
-| NVM | 0.40.1 | Node 版本管理器 |
-| Node.js | v24.14.0 | 运行环境 |
-| Google Chrome | 最新稳定版 | 浏览器自动化 |
-| OpenClaw | 可选 | `--version cn` 或 `--version original` |
-| Agent Workspaces | 5 个 | 工作空间 |
+## 敏感信息配置
 
-## 使用方式
-
-### 环境检测（推荐先执行）
-```bash
-# 检测当前环境状态，不执行任何安装
-./scripts/install.sh --check
-```
-
-输出示例：
-```
-═══════════════════════════════════════════════════════════════
-                    📊 当前环境状态
-═══════════════════════════════════════════════════════════════
-
-【系统工具】
-  ✅ curl 已安装
-  ✅ wget 已安装
-  ✅ git 已安装
-  ❌ htop 未安装
-  ...
-
-【OpenClaw】
-  ✅ OpenClaw-CN (社区版): 0.1.8-fix.3
-  ✅ 配置文件已存在
-```
-
-### 一键安装
-```bash
-# 社区版（默认）
-./scripts/install.sh --all
-
-# 原版
-./scripts/install.sh --all --version original
-```
-
-### 分阶段安装
-```bash
-# 安装系统依赖
-./scripts/install.sh --stage system
-
-# 安装 NVM 和 Node.js
-./scripts/install.sh --stage node
-
-# 安装 Chrome
-./scripts/install.sh --stage chrome
-
-# 安装 OpenClaw
-./scripts/install.sh --stage openclaw
-
-# 恢复配置
-./scripts/install.sh --stage config
-
-# 验证安装
-./scripts/install.sh --stage verify
-
-# 安装编程工具
-./scripts/install.sh --stage dev-tools
-
-# 配置文件共享
-./scripts/install.sh --stage file-sharing
-
-# 安装 Obsidian
-./scripts/install.sh --stage obsidian
-```
-
-## 文件共享配置
-
-### 共享虚拟机文件夹给 Windows
-
-安装完成后，虚拟机的 `/home/Share` 目录会自动共享给 Windows。
-
-**Windows 访问方式**：
-```
-\\<虚拟机IP>\Share
-```
-
-例如：`\\192.168.1.100\Share`
-
-### 挂载 Windows 共享文件夹
-
-1. **Windows 端设置共享**
-   - 右键文件夹 → 属性 → 共享 → 共享此文件夹
-   - 记下共享名（如 `shared`）
-
-2. **虚拟机端挂载**
-   ```bash
-   # 使用生成的脚本
-   ~/mount-win.sh <Windows IP> <共享名> [用户名] [密码]
-
-   # 示例 (guest 模式)
-   ~/mount-win.sh 192.168.1.100 shared
-
-   # 示例 (用户认证)
-   ~/mount-win.sh 192.168.1.100 shared myuser mypassword
-   ```
-
-3. **卸载**
-   ```bash
-   ~/unmount-win.sh
-   ```
-
-### 目录说明
-
-| 路径 | 用途 |
-|------|------|
-| `/home/mnt/win` | Windows 共享文件夹挂载点 |
-| `/home/Share` | 共享给 Windows 的文件夹 |
-
-## 配置说明
-
-### 敏感信息配置
-
-创建 `config/secrets.env` 文件：
+### 配置文件模板
 
 ```bash
-# API Keys
-SILICONFLOW_API_KEY=sk-xxx
-BAIDU_QIANFAN_API_KEY=bce-v3/xxx
+# config/secrets.env
 
-# 飞书配置
-FEISHU_APP_ID=cli_xxx
-FEISHU_APP_SECRET=xxx
+# ============ API Keys ============
+# SiliconFlow (DeepSeek/Qwen 等模型)
+SILICONFLOW_API_KEY=sk-xxxxxxxxxxxxxxxx
 
-# Gateway 配置
-GATEWAY_TOKEN=xxx
+# 百度千帆 (ERNIE 等模型)
+BAIDU_QIANFAN_API_KEY=bce-v3/xxxxxxxxxxxxxxxx
+
+# ============ 飞书配置 ============
+# 用于飞书消息通道
+FEISHU_APP_ID=cli_xxxxxxxxxxxx
+FEISHU_APP_SECRET=xxxxxxxxxxxxxxxxxxxx
+
+# ============ Gateway 配置 ============
+# 留空则自动生成
+GATEWAY_TOKEN=
 ```
 
 ### 配置获取地址
 
 | 配置项 | 获取地址 |
 |--------|----------|
-| SiliconFlow API Key | https://cloud.siliconflow.cn/account/ak |
-| 百度千帆 API Key | https://console.bce.baidu.com/qianfan/ais/console/applicationConsole/application/v2 |
-| 飞书应用 | https://open.feishu.cn/app |
+| SiliconFlow | https://cloud.siliconflow.cn/account/ak |
+| 百度千帆 | https://console.bce.baidu.com/qianfan/ais/console/applicationConsole/application/v2 |
+| 飞书应用 | https://open.feishu.cn/app → 创建企业自建应用 |
 
-## 国内网络适配
-
-脚本自动配置以下镜像源：
-
-- **npm**: https://registry.npmmirror.com
-- **NVM**: https://npmmirror.com/mirrors/node
-- **Chrome**: 官方 .deb 包直连下载
-
-## 项目结构
-
-```
-openclaw-recovery/
-├── specs/                    # 规格文档
-│   ├── 00-overview.md        # 总体规格
-│   ├── 01-system-deps.md     # 系统依赖
-│   ├── 02-openclaw-install.md
-│   ├── 03-config-restore.md
-│   ├── 04-workspaces.md
-│   └── 05-verification.md
-├── scripts/
-│   └── install.sh            # 主安装脚本
-├── config/
-│   ├── openclaw.json.template
-│   └── secrets.env.example
-└── README.md
-```
+---
 
 ## 保护机制
-
-脚本内置多层保护机制，防止意外覆盖已有配置：
 
 ### 1. 环境检测模式
 ```bash
@@ -271,54 +228,40 @@ openclaw-recovery/
 仅检测环境状态，不执行任何安装操作。
 
 ### 2. 执行计划预览
-运行安装前，显示将要执行的所有阶段和潜在风险：
-```
-═══════════════════════════════════════════════════════════════
-                    📋 执行计划
-═══════════════════════════════════════════════════════════════
-
-【将执行的阶段】
-  1. system     - 安装系统依赖
-  ...
-
-【潜在风险】
-  ⚠️  阶段 config     : 会覆盖 ~/.openclaw/openclaw.json (有备份)
-  ⚠️  阶段 file-sharing: 会修改 /etc/samba/smb.conf (有备份)
-```
+运行安装前显示将要执行的所有阶段和潜在风险。
 
 ### 3. 配置变更预览
-在覆盖配置文件前，显示差异对比：
-```
-═══════════════════════════════════════════════════════════════
-                    📝 配置变更预览: openclaw.json
-═══════════════════════════════════════════════════════════════
-
---- 现有配置
-+++ 新配置
-@@ -10,7 +10,7 @@
--  "model": "old-model"
-+  "model": "new-model"
-```
+覆盖配置前显示 diff 对比，需要用户确认。
 
 ### 4. 自动备份
-所有配置修改前自动创建备份：
-- `openclaw.json` → `openclaw.json.bak.20260324120000`
+- `openclaw.json` → `openclaw.json.bak.YYYYMMDDHHMMSS`
 - `smb.conf` → `smb.conf.bak`
 
 ### 5. 交互式确认
-关键操作需要用户明确确认：
-```
-⚠️  即将覆盖: /home/user/.openclaw/openclaw.json
-   原文件将备份为: openclaw.json.bak.<时间戳>
+关键操作需要 `y/N` 确认。
 
-是否继续？(y/N):
-```
+---
+
+## 使用场景
+
+### ✅ 推荐场景
+
+- 新安装的 Ubuntu 虚拟机
+- 系统重装后快速恢复环境
+- 虚拟机快照恢复后重建环境
+
+### ❌ 不推荐场景
+
+- 已配置好的生产环境（可能覆盖配置）
+- 不确定当前环境状态（建议先用 --check 检测）
+
+---
 
 ## 常见问题
 
 ### Q: NVM 安装失败
 ```bash
-# 尝试使用国内镜像
+# 使用国内镜像
 curl -o- https://gitee.com/mirrors/nvm/raw/master/install.sh | bash
 ```
 
@@ -331,18 +274,67 @@ sudo apt install -y ./google-chrome-stable_current_amd64.deb
 
 ### Q: Node.js 下载慢
 ```bash
-# 确认 NVM 镜像配置
 export NVM_NODEJS_ORG_MIRROR=https://npmmirror.com/mirrors/node
 nvm install 24.14.0
 ```
 
-## 开发说明
+### Q: 如何恢复备份的配置？
+```bash
+# 查找备份文件
+ls -la ~/.openclaw/openclaw.json.bak.*
 
-本项目基于 **SpecKit** 规格驱动开发：
+# 恢复
+cp ~/.openclaw/openclaw.json.bak.20260324120000 ~/.openclaw/openclaw.json
+```
 
-1. 先编写 `specs/` 目录下的规格文档
-2. 根据规格文档实现 `scripts/` 目录下的脚本
-3. 规格文档与实现保持同步
+---
+
+## 项目结构
+
+```
+openclaw-recovery/
+├── README.md                   # 本文档
+├── DO_NOT_TEST_HERE.md         # 生产环境警告
+├── specs/                      # 规格文档
+│   ├── 00-overview.md
+│   ├── 01-system-deps.md
+│   ├── 02-openclaw-install.md
+│   ├── 03-config-restore.md
+│   ├── 04-workspaces.md
+│   ├── 05-verification.md
+│   ├── 06-dev-tools.md
+│   └── 07-obsidian.md
+├── scripts/
+│   ├── install.sh              # 主入口
+│   ├── lib/
+│   │   └── common.sh           # 公共函数
+│   └── stages/
+│       ├── 01-system.sh
+│       ├── 02-node.sh
+│       ├── 03-chrome.sh
+│       ├── 04-openclaw.sh
+│       ├── 05-config.sh
+│       ├── 06-workspaces.sh
+│       ├── 07-verify.sh
+│       ├── 08-dev-tools.sh
+│       ├── 09-file-sharing.sh
+│       └── 10-obsidian.sh
+└── config/
+    ├── openclaw.json.template  # 配置模板
+    ├── secrets.env.example     # 敏感信息示例
+    └── secrets.env             # 敏感信息（需创建，不提交）
+```
+
+---
+
+## 相关资源
+
+- **GitHub**: https://github.com/JunJunHub/openclaw-recovery
+- **OpenClaw 官方文档**: https://docs.openclaw.ai
+- **OpenClaw 中文社区**: https://clawd.org.cn
+- **问题反馈**: https://github.com/JunJunHub/openclaw-recovery/issues
+
+---
 
 ## License
 
