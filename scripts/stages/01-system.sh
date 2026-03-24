@@ -34,4 +34,11 @@ install_apt_packages \
   open-vm-tools \
   open-vm-tools-desktop || log_warn "VMware 工具安装失败（可能不是 VMware 环境）"
 
+# 安装文件共享工具
+log_info "安装文件共享工具..."
+install_apt_packages \
+  cifs-utils \
+  samba \
+  samba-common-bin
+
 log_info "系统依赖安装完成"

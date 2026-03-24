@@ -63,6 +63,7 @@ while [[ $# -gt 0 ]]; do
       echo "  workspaces- Workspace 恢复"
       echo "  verify    - 验证测试"
       echo "  dev-tools - 编程工具 (Claude Code, GitHub CLI)"
+      echo "  file-sharing - 文件共享配置 (Samba, CIFS)"
       exit 0
       ;;
     *)
@@ -128,6 +129,7 @@ main() {
     run_stage "06-workspaces" || exit 1
     run_stage "07-verify" || exit 1
     run_stage "08-dev-tools" || exit 1
+    run_stage "09-file-sharing" || exit 1
   elif [ -n "$STAGE" ]; then
     # 执行指定阶段
     case "$STAGE" in
@@ -139,6 +141,7 @@ main() {
       workspaces) run_stage "06-workspaces" || exit 1 ;;
       verify) run_stage "07-verify" || exit 1 ;;
       dev-tools) run_stage "08-dev-tools" || exit 1 ;;
+      file-sharing) run_stage "09-file-sharing" || exit 1 ;;
       *)
         log_error "未知阶段: $STAGE"
         exit 1

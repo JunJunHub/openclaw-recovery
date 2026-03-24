@@ -74,6 +74,13 @@ chmod +x scripts/install.sh
 | Claude Code CLI | AI 编程助手 |
 | GitHub CLI | GitHub 命令行工具 |
 
+### 文件共享工具
+
+| 工具 | 用途 |
+|------|------|
+| cifs-utils | 挂载 Windows 共享文件夹 |
+| Samba | 共享文件夹给 Windows |
+
 ### 核心组件
 
 | 组件 | 版本 | 说明 |
@@ -117,7 +124,53 @@ chmod +x scripts/install.sh
 
 # 安装编程工具
 ./scripts/install.sh --stage dev-tools
+
+# 配置文件共享
+./scripts/install.sh --stage file-sharing
 ```
+
+## 文件共享配置
+
+### 共享虚拟机文件夹给 Windows
+
+安装完成后，虚拟机的 `/home/Share` 目录会自动共享给 Windows。
+
+**Windows 访问方式**：
+```
+\\<虚拟机IP>\Share
+```
+
+例如：`\\192.168.1.100\Share`
+
+### 挂载 Windows 共享文件夹
+
+1. **Windows 端设置共享**
+   - 右键文件夹 → 属性 → 共享 → 共享此文件夹
+   - 记下共享名（如 `shared`）
+
+2. **虚拟机端挂载**
+   ```bash
+   # 使用生成的脚本
+   ~/mount-win.sh <Windows IP> <共享名> [用户名] [密码]
+
+   # 示例 (guest 模式)
+   ~/mount-win.sh 192.168.1.100 shared
+
+   # 示例 (用户认证)
+   ~/mount-win.sh 192.168.1.100 shared myuser mypassword
+   ```
+
+3. **卸载**
+   ```bash
+   ~/unmount-win.sh
+   ```
+
+### 目录说明
+
+| 路径 | 用途 |
+|------|------|
+| `/home/mnt/win` | Windows 共享文件夹挂载点 |
+| `/home/Share` | 共享给 Windows 的文件夹 |
 
 ## 配置说明
 
