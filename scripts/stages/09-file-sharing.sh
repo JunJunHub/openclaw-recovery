@@ -28,14 +28,68 @@ setup_samba() {
 
   local smb_conf="/etc/samba/smb.conf"
 
-  # 备份原配置
-  sudo cp "$smb_conf" "${smb_conf}.bak"
-
   # 检查是否已配置
   if grep -q "\[Share\]" "$smb_conf" 2>/dev/null; then
     log_info "Samba 共享已配置，跳过"
     return 0
   fi
+
+  # 创建预览配置
+  local temp_conf=$(mktemp)
+  cp "$smb_conf" "$temp_conf"
+  cat >> "$temp_conf" << 'EOF'
+
+# ===== OpenClaw Recovery 自动配置 =====
+[Share]
+   path = /home/Share
+   browseable = yes
+   read only = no
+   create mask = 0777
+   directory mask = 0777
+   public = yes
+   writable = yes
+   guest ok = yes
+   force user = nobody
+   force group = nogroup
+EOF
+
+  # 显示差异
+  echo ""
+  echo "═══════════════════════════════════════════════════════════════"
+  echo "                    📝 Samba 配置变更预览"
+  echo "═══════════════════════════════════════════════════════════════"
+  echo ""
+  echo "将添加以下配置到 /etc/samba/smb.conf:"
+  echo ""
+  echo "───────────────────────────────────────"
+  cat << 'EOF'
+[Share]
+   path = /home/Share
+   browseable = yes
+   read only = no
+   create mask = 0777
+   directory mask = 0777
+   public = yes
+   writable = yes
+   guest ok = yes
+   force user = nobody
+   force group = nogroup
+EOF
+  echo "───────────────────────────────────────"
+  echo ""
+
+  # 确认
+  confirm_overwrite "/etc/samba/smb.conf" || {
+    rm -f "$temp_conf"
+    log_warn "跳过 Samba 配置"
+    return 0
+  }
+
+  rm -f "$temp_conf"
+
+  # 备份原配置
+  sudo cp "$smb_conf" "${smb_conf}.bak"
+  log_info "已备份原配置: ${smb_conf}.bak"
 
   # 添加共享配置
   sudo tee -a "$smb_conf" > /dev/null << 'EOF'

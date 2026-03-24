@@ -50,6 +50,52 @@ backup_config() {
   fi
 }
 
+# 显示配置差异并确认
+show_diff_and_confirm() {
+  if [ ! -f "$CONFIG_FILE" ]; then
+    log_info "无现有配置文件，将创建新文件"
+    return 0
+  fi
+
+  # 创建临时文件用于比较
+  local temp_file=$(mktemp)
+  inject_secrets_silent "$CONFIG_TEMPLATE" "$temp_file"
+
+  # 显示差异
+  show_config_diff "$CONFIG_FILE" "$temp_file" "openclaw.json"
+
+  # 确认覆盖
+  confirm_overwrite "$CONFIG_FILE"
+
+  local result=$?
+  rm -f "$temp_file"
+
+  return $result
+}
+
+# 静默注入（不打印日志）
+inject_secrets_silent() {
+  local template="$1"
+  local output="$2"
+
+  if [ ! -f "$template" ]; then
+    return 1
+  fi
+
+  cp "$template" "$output"
+
+  # 替换占位符
+  sed -i "s|{{SILICONFLOW_API_KEY}}|${SILICONFLOW_API_KEY}|g" "$output"
+  sed -i "s|{{BAIDU_QIANFAN_API_KEY}}|${BAIDU_QIANFAN_API_KEY}|g" "$output"
+  sed -i "s|{{FEISHU_APP_ID}}|${FEISHU_APP_ID}|g" "$output"
+  sed -i "s|{{FEISHU_APP_SECRET}}|${FEISHU_APP_SECRET}|g" "$output"
+  sed -i "s|{{GATEWAY_TOKEN}}|${GATEWAY_TOKEN}|g" "$output"
+  sed -i "s|{{HOME}}|${HOME}|g" "$output"
+
+  # 设置权限
+  chmod 600 "$output"
+}
+
 # 恢复配置文件
 restore_config() {
   log_step "恢复配置文件..."
@@ -68,6 +114,10 @@ restore_config() {
 main() {
   load_secrets_interactive
   validate_secrets || return 1
+
+  # 显示差异并确认
+  show_diff_and_confirm || return 1
+
   backup_config
   restore_config
 

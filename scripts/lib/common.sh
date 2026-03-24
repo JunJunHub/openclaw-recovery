@@ -71,6 +71,136 @@ dir_exists() {
   [ -d "$1" ]
 }
 
+# 检查服务是否运行
+service_running() {
+  systemctl is-active --quiet "$1" 2>/dev/null
+}
+
+# 环境检测
+check_environment() {
+  log_step "环境检测..."
+
+  echo ""
+  echo "═══════════════════════════════════════════════════════════════"
+  echo "                    📊 当前环境状态"
+  echo "═══════════════════════════════════════════════════════════════"
+  echo ""
+
+  # 系统工具
+  echo "【系统工具】"
+  local tools=("curl" "wget" "git" "vim" "jq" "htop" "tmux" "node" "npm")
+  for tool in "${tools[@]}"; do
+    if command_exists "$tool"; then
+      local version=""
+      case "$tool" in
+        node) version=" ($(node --version 2>/dev/null))" ;;
+        npm) version=" ($(npm --version 2>/dev/null))" ;;
+        *) version="" ;;
+      esac
+      echo "  ✅ $tool 已安装$version"
+    else
+      echo "  ❌ $tool 未安装"
+    fi
+  done
+  echo ""
+
+  # SSH 服务
+  echo "【网络服务】"
+  if service_running "ssh"; then
+    echo "  ✅ SSH 服务运行中"
+  elif command_exists "sshd"; then
+    echo "  ⚠️  SSH 已安装但未运行"
+  else
+    echo "  ❌ SSH 未安装"
+  fi
+  echo ""
+
+  # 浏览器
+  echo "【浏览器】"
+  if command_exists "google-chrome"; then
+    echo "  ✅ Chrome 已安装 ($(google-chrome --version 2>/dev/null | awk '{print $3}'))"
+  else
+    echo "  ❌ Chrome 未安装"
+  fi
+  echo ""
+
+  # OpenClaw
+  echo "【OpenClaw】"
+  if command_exists "openclaw" || command_exists "openclaw-cn"; then
+    local oc_version=""
+    if command_exists "openclaw"; then
+      oc_version="$(openclaw --version 2>/dev/null || echo "unknown")"
+      echo "  ✅ OpenClaw (原版): $oc_version"
+    fi
+    if command_exists "openclaw-cn"; then
+      oc_version="$(openclaw-cn --version 2>/dev/null || echo "unknown")"
+      echo "  ✅ OpenClaw-CN (社区版): $oc_version"
+    fi
+  else
+    echo "  ❌ OpenClaw 未安装"
+  fi
+
+  # 配置文件
+  if [ -f "$HOME/.openclaw/openclaw.json" ]; then
+    echo "  ✅ 配置文件已存在"
+  else
+    echo "  ❌ 配置文件不存在"
+  fi
+  echo ""
+
+  # 工作空间
+  echo "【工作空间】"
+  local workspaces=("workspace" "workspace-thinker" "workspace-media" "workspace-monitor" "workspace-coder")
+  for ws in "${workspaces[@]}"; do
+    if dir_exists "$HOME/.openclaw/$ws"; then
+      echo "  ✅ $ws"
+    else
+      echo "  ❌ $ws 不存在"
+    fi
+  done
+  echo ""
+
+  # 开发工具
+  echo "【开发工具】"
+  if command_exists "claude"; then
+    echo "  ✅ Claude Code CLI 已安装"
+  else
+    echo "  ❌ Claude Code CLI 未安装"
+  fi
+  if command_exists "gh"; then
+    echo "  ✅ GitHub CLI 已安装 ($(gh --version 2>/dev/null | head -1 | awk '{print $3}'))"
+  else
+    echo "  ❌ GitHub CLI 未安装"
+  fi
+  echo ""
+
+  # 文件共享
+  echo "【文件共享】"
+  if service_running "smbd"; then
+    echo "  ✅ Samba 服务运行中"
+  else
+    echo "  ❌ Samba 未运行"
+  fi
+  if [ -d "/home/Share" ]; then
+    echo "  ✅ 共享目录存在: /home/Share"
+  else
+    echo "  ❌ 共享目录不存在"
+  fi
+  echo ""
+
+  # Obsidian
+  echo "【桌面应用】"
+  if [ -f "$HOME/Applications/Obsidian.AppImage" ]; then
+    echo "  ✅ Obsidian 已安装"
+  else
+    echo "  ❌ Obsidian 未安装"
+  fi
+  echo ""
+
+  echo "═══════════════════════════════════════════════════════════════"
+  echo ""
+}
+
 # 确认操作
 confirm() {
   local prompt="$1"
@@ -199,4 +329,55 @@ inject_secrets() {
   chmod 600 "$output"
 
   log_info "配置文件已生成: $output"
+}
+
+# 显示配置差异
+show_config_diff() {
+  local old_file="$1"
+  local new_file="$2"
+  local file_name="$3"
+
+  if [ ! -f "$old_file" ]; then
+    log_info "无现有配置文件，将创建新文件"
+    return 0
+  fi
+
+  echo ""
+  echo "═══════════════════════════════════════════════════════════════"
+  echo "                    📝 配置变更预览: $file_name"
+  echo "═══════════════════════════════════════════════════════════════"
+  echo ""
+
+  # 显示差异
+  if diff -u "$old_file" "$new_file" 2>/dev/null; then
+    log_info "配置文件无变化"
+  else
+    echo ""
+    echo "--- 现有配置"
+    echo "+++ 新配置"
+    diff -u "$old_file" "$new_file" 2>/dev/null || true
+  fi
+
+  echo ""
+  echo "═══════════════════════════════════════════════════════════════"
+  echo ""
+}
+
+# 确认配置覆盖
+confirm_overwrite() {
+  local file_name="$1"
+
+  echo "⚠️  即将覆盖: $file_name"
+  echo "   原文件将备份为: ${file_name}.bak.<时间戳>"
+  echo ""
+
+  read -p "是否继续？(y/N): " -n 1 -r
+  echo
+
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    log_warn "用户取消操作"
+    return 1
+  fi
+
+  return 0
 }

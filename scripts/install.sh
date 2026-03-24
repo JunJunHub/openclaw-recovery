@@ -1,6 +1,6 @@
 #!/bin/bash
 # OpenClaw 一键恢复脚本
-# 用法: ./install.sh [--all | --stage <stage>] [--version <cn|original>] [--interactive]
+# 用法: ./install.sh [--all | --stage <stage>] [--version <cn|original>] [--interactive] [--check]
 
 set -e
 
@@ -8,12 +8,14 @@ set -e
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # 日志函数
 log_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
 log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+log_step() { echo -e "${BLUE}[STEP]${NC} $1"; }
 
 # 脚本目录
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -23,6 +25,7 @@ PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 INTERACTIVE=false
 STAGE=""
 VERSION="cn"
+DRY_RUN=false
 
 # 解析参数
 while [[ $# -gt 0 ]]; do
@@ -43,8 +46,12 @@ while [[ $# -gt 0 ]]; do
       INTERACTIVE=true
       shift
       ;;
+    --check|--dry-run)
+      DRY_RUN=true
+      shift
+      ;;
     -h|--help)
-      echo "用法: $0 [--all | --stage <stage>] [--version <cn|original>] [--interactive]"
+      echo "用法: $0 [--all | --stage <stage>] [--version <cn|original>] [--interactive] [--check]"
       echo ""
       echo "选项:"
       echo "  --all              执行所有阶段"
@@ -53,16 +60,17 @@ while [[ $# -gt 0 ]]; do
       echo "                       cn       - 社区版 (openclaw-cn, 默认)"
       echo "                       original - 原版 (openclaw)"
       echo "  --interactive      交互式输入敏感信息"
+      echo "  --check            仅检测环境，不执行安装"
       echo ""
       echo "可用阶段:"
-      echo "  system    - 系统依赖安装"
-      echo "  node      - Node.js 安装"
-      echo "  chrome    - Chrome 浏览器安装"
-      echo "  openclaw  - OpenClaw 安装"
-      echo "  config    - 配置恢复"
-      echo "  workspaces- Workspace 恢复"
-      echo "  verify    - 验证测试"
-      echo "  dev-tools - 编程工具 (Claude Code, GitHub CLI)"
+      echo "  system     - 系统依赖安装"
+      echo "  node       - Node.js 安装"
+      echo "  chrome     - Chrome 浏览器安装"
+      echo "  openclaw   - OpenClaw 安装"
+      echo "  config     - 配置恢复"
+      echo "  workspaces - Workspace 恢复"
+      echo "  verify     - 验证测试"
+      echo "  dev-tools  - 编程工具 (Claude Code, GitHub CLI)"
       echo "  file-sharing - 文件共享配置 (Samba, CIFS)"
       echo "  obsidian   - Obsidian AppImage 安装"
       exit 0
@@ -79,6 +87,40 @@ source "$SCRIPT_DIR/lib/common.sh"
 
 # 设置 OpenClaw 版本
 set_openclaw_version "$VERSION"
+
+# 显示将要执行的操作
+show_execution_plan() {
+  echo ""
+  echo "═══════════════════════════════════════════════════════════════"
+  echo "                    📋 执行计划"
+  echo "═══════════════════════════════════════════════════════════════"
+  echo ""
+
+  if [ "$STAGE" = "all" ]; then
+    echo "【将执行的阶段】"
+    echo "  1. system     - 安装系统依赖 (curl, wget, git, vim, htop, tmux, SSH)"
+    echo "  2. node       - 安装 NVM + Node.js v24"
+    echo "  3. chrome     - 安装 Google Chrome"
+    echo "  4. openclaw   - 安装 OpenClaw ($OPENCLAW_PACKAGE)"
+    echo "  5. config     - 恢复配置文件 (⚠️ 可能覆盖现有配置)"
+    echo "  6. workspaces - 创建工作空间目录"
+    echo "  7. verify     - 验证安装"
+    echo "  8. dev-tools  - 安装 Claude Code CLI + GitHub CLI"
+    echo "  9. file-sharing - 配置 Samba 文件共享 (⚠️ 修改 smb.conf)"
+    echo "  10. obsidian  - 安装 Obsidian AppImage"
+  else
+    echo "【将执行的阶段】"
+    echo "  $STAGE"
+  fi
+
+  echo ""
+  echo "【潜在风险】"
+  echo "  ⚠️  阶段 config     : 会覆盖 ~/.openclaw/openclaw.json (有备份)"
+  echo "  ⚠️  阶段 file-sharing: 会修改 /etc/samba/smb.conf (有备份)"
+  echo ""
+  echo "═══════════════════════════════════════════════════════════════"
+  echo ""
+}
 
 # 阶段执行函数
 run_stage() {
@@ -98,16 +140,37 @@ run_stage() {
 main() {
   echo "========================================"
   echo "  OpenClaw 一键恢复脚本"
-  echo "  版本: 0.2.0"
+  echo "  版本: 0.3.0"
   echo "========================================"
   echo ""
-  echo "⚠️  警告：此脚本仅供新虚拟机环境使用！"
+
+  # 检测模式
+  if [ "$DRY_RUN" = true ]; then
+    check_environment
+    log_info "检测模式完成，未执行任何安装"
+    exit 0
+  fi
+
+  # 显示执行计划
+  show_execution_plan
+
+  # 强化警告
+  echo "⚠️  警告：此脚本会修改系统配置！"
   echo ""
   echo "在已配置好的环境中运行可能："
-  echo "  - 覆盖现有配置"
-  echo "  - 破坏系统环境"
+  echo "  • 覆盖 OpenClaw 配置文件 (有备份)"
+  echo "  • 修改 Samba 配置 (有备份)"
+  echo "  • 安装/更新系统软件包"
   echo ""
-  read -p "确认这是新虚拟机环境？(yes/no): " confirm
+  echo "推荐使用场景："
+  echo "  ✅ 新虚拟机环境"
+  echo "  ✅ 系统重装后的恢复"
+  echo ""
+  echo "不推荐场景："
+  echo "  ❌ 已配置好的生产环境"
+  echo "  ❌ 不确定当前环境状态"
+  echo ""
+  read -p "确认继续执行？请输入 'yes' 继续: " confirm
   if [[ "$confirm" != "yes" ]]; then
     echo "已取消安装"
     exit 1
