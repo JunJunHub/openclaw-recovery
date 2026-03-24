@@ -80,3 +80,48 @@ inject_secrets() {
 | FEISHU_APP_ID | 飞书开放平台 | 可选 |
 | FEISHU_APP_SECRET | 飞书开放平台 | 可选 |
 | GATEWAY_TOKEN | 自定义生成 | 是 |
+
+## Memory Search 配置
+
+### 远程嵌入服务（推荐）
+
+使用 SiliconFlow 的嵌入 API，避免本地模型下载和性能问题：
+
+```json
+{
+  "memorySearch": {
+    "enabled": true,
+    "provider": "openai",
+    "model": "BAAI/bge-m3",
+    "remote": {
+      "baseUrl": "https://api.siliconflow.cn/v1",
+      "apiKey": "{{SILICONFLOW_API_KEY}}"
+    },
+    "query": {
+      "hybrid": {
+        "enabled": true,
+        "vectorWeight": 0.7,
+        "textWeight": 0.3
+      }
+    },
+    "cache": {"enabled": true}
+  }
+}
+```
+
+### 可用嵌入模型
+
+| 模型 | 最大 Token | 说明 |
+|------|-----------|------|
+| `BAAI/bge-large-zh-v1.5` | 512 | 中文，短文本 |
+| `BAAI/bge-m3` | 8192 | 多语言，推荐 |
+| `Qwen/Qwen3-Embedding-8B` | 32768 | 长文本 |
+
+### 配置后操作
+
+配置完成后需要重建索引：
+
+```bash
+openclaw gateway restart
+openclaw memory index --force
+```

@@ -1,6 +1,6 @@
 {
   "meta": {
-    "lastTouchedVersion": "0.1.8-fix.3"
+    "lastTouchedVersion": "2026.3.23-2"
   },
   "env": {
     "shellEnv": {
@@ -153,9 +153,11 @@
       "subagents": {"maxConcurrent": 8},
       "memorySearch": {
         "enabled": true,
-        "provider": "local",
-        "local": {
-          "modelPath": "hf:ggml-org/embeddinggemma-300m-qat-q8_0-GGUF/embeddinggemma-300m-qat-Q8_0.gguf"
+        "provider": "openai",
+        "model": "BAAI/bge-m3",
+        "remote": {
+          "baseUrl": "https://api.siliconflow.cn/v1",
+          "apiKey": "{{SILICONFLOW_API_KEY}}"
         },
         "query": {
           "hybrid": {
