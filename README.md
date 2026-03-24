@@ -59,6 +59,7 @@ chmod +x scripts/install.sh
 | htop | 进程监控 |
 | tmux | 终端复用 |
 | jq | JSON 处理 |
+| openssh-server | SSH 远程登录 |
 
 ### 虚拟机工具
 

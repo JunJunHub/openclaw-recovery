@@ -28,6 +28,16 @@ install_apt_packages \
   htop \
   tmux
 
+# 安装 SSH 服务
+log_info "安装 SSH 服务..."
+install_apt_packages \
+  openssh-server
+
+# 启用并启动 SSH
+sudo systemctl enable ssh
+sudo systemctl start ssh
+log_info "SSH 服务已启用"
+
 # 安装虚拟机工具（VMware）
 log_info "安装 VMware 增强工具..."
 install_apt_packages \
