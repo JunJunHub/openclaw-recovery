@@ -15,7 +15,7 @@ log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 log_step() { echo -e "${BLUE}[STEP]${NC} $1"; }
 
 # OpenClaw 版本配置
-OPENCLAW_CN_VERSION="openclaw-cn@0.1.8-fix.3"
+OPENCLAW_CN_VERSION="openclaw-cn@latest"
 OPENCLAW_ORIGINAL_VERSION="openclaw@latest"
 
 # 当前选择的版本（默认社区版）
