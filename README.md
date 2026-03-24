@@ -81,6 +81,12 @@ chmod +x scripts/install.sh
 | cifs-utils | 挂载 Windows 共享文件夹 |
 | Samba | 共享文件夹给 Windows |
 
+### 桌面应用
+
+| 应用 | 说明 |
+|------|------|
+| Obsidian | 笔记应用 (AppImage) |
+
 ### 核心组件
 
 | 组件 | 版本 | 说明 |
@@ -127,6 +133,9 @@ chmod +x scripts/install.sh
 
 # 配置文件共享
 ./scripts/install.sh --stage file-sharing
+
+# 安装 Obsidian
+./scripts/install.sh --stage obsidian
 ```
 
 ## 文件共享配置

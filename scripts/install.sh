@@ -64,6 +64,7 @@ while [[ $# -gt 0 ]]; do
       echo "  verify    - 验证测试"
       echo "  dev-tools - 编程工具 (Claude Code, GitHub CLI)"
       echo "  file-sharing - 文件共享配置 (Samba, CIFS)"
+      echo "  obsidian   - Obsidian AppImage 安装"
       exit 0
       ;;
     *)
@@ -130,6 +131,7 @@ main() {
     run_stage "07-verify" || exit 1
     run_stage "08-dev-tools" || exit 1
     run_stage "09-file-sharing" || exit 1
+    run_stage "10-obsidian" || exit 1
   elif [ -n "$STAGE" ]; then
     # 执行指定阶段
     case "$STAGE" in
@@ -142,6 +144,7 @@ main() {
       verify) run_stage "07-verify" || exit 1 ;;
       dev-tools) run_stage "08-dev-tools" || exit 1 ;;
       file-sharing) run_stage "09-file-sharing" || exit 1 ;;
+      obsidian) run_stage "10-obsidian" || exit 1 ;;
       *)
         log_error "未知阶段: $STAGE"
         exit 1
