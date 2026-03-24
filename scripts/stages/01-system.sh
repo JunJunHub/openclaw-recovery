@@ -61,7 +61,6 @@ install_apt_packages \
   ibus-clutter \
   ibus-gtk \
   ibus-gtk3 \
-  ibus-qt4 \
   im-config \
   ibus-pinyin \
   ibus-table

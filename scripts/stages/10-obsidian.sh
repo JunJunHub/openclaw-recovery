@@ -5,7 +5,8 @@ log_info "=== 阶段 10: Obsidian 安装 ==="
 
 OBSIDIAN_DIR="$HOME/Applications"
 OBSIDIAN_APPIMAGE="$OBSIDIAN_DIR/Obsidian.AppImage"
-OBSIDIAN_URL="https://github.com/obsidianmd/obsidian-releases/releases/latest/download/Obsidian-1.8.9.AppImage"
+# 旧版本回退 URL（当 API 不可用时使用）
+OBSIDIAN_URL="https://github.com/obsidianmd/obsidian-releases/releases/download/v1.12.7/Obsidian-1.12.7.AppImage"
 
 # 创建应用目录
 setup_directories() {
@@ -31,20 +32,91 @@ download_obsidian() {
     rm -f "$OBSIDIAN_APPIMAGE"
   fi
 
-  # 获取最新版本下载链接
-  local latest_url=$(curl -sL "https://api.github.com/repos/obsidianmd/obsidian-releases/releases/latest" | jq -r '.assets[] | select(.name | endswith(".AppImage")) | .browser_download_url' | head -1)
-
-  if [ -z "$latest_url" ]; then
-    log_warn "无法获取最新版本，使用默认链接"
-    latest_url="$OBSIDIAN_URL"
+  # 检测系统架构
+  local system_arch=$(uname -m)
+  log_info "系统架构: $system_arch"
+  
+  # 获取最新版本信息
+  log_info "获取 Obsidian 最新版本信息..."
+  local release_info=$(curl -sL "https://api.github.com/repos/obsidianmd/obsidian-releases/releases/latest")
+  local tag_name=$(echo "$release_info" | jq -r '.tag_name')
+  log_info "最新版本: $tag_name"
+  
+  # 获取所有 AppImage 资产
+  local asset_list=$(echo "$release_info" | jq -r '.assets[] | select(.name | endswith(".AppImage")) | "\(.name) \(.browser_download_url)"')
+  
+  if [ -z "$asset_list" ]; then
+    log_error "无法获取 Obsidian AppImage 资产列表"
+    return 1
   fi
-
-  log_info "下载地址: $latest_url"
-  wget -q --show-progress -O "$OBSIDIAN_APPIMAGE" "$latest_url"
+  
+  # 选择合适的 AppImage
+  local selected_url=""
+  
+  # 根据架构选择合适的文件
+  if [[ "$system_arch" == "x86_64" || "$system_arch" == "amd64" ]]; then
+    log_info "选择 x86_64 架构的 Obsidian"
+    
+    # 首先尝试无架构后缀的标准版本（通常是 x86_64）
+    selected_url=$(echo "$asset_list" | awk '/\.AppImage$/ && !/arm64|aarch64/ {print $2}' | head -1)
+    
+    # 如果没有找到，尝试包含 x86_64 或 amd64 的版本
+    if [ -z "$selected_url" ]; then
+      selected_url=$(echo "$asset_list" | awk '/x86_64|amd64/ {print $2}' | head -1)
+    fi
+  elif [[ "$system_arch" == "aarch64" || "$system_arch" == "arm64" ]]; then
+    log_info "选择 ARM64 架构的 Obsidian"
+    selected_url=$(echo "$asset_list" | awk '/arm64|aarch64/ {print $2}' | head -1)
+  else
+    log_warn "未知系统架构: $system_arch，尝试选择第一个 AppImage"
+    selected_url=$(echo "$asset_list" | awk '{print $2}' | head -1)
+  fi
+  
+  if [ -z "$selected_url" ]; then
+    log_error "无法找到适合系统架构 ($system_arch) 的 Obsidian AppImage"
+    log_error "可用的 AppImage 文件:"
+    echo "$asset_list" | while read line; do
+      log_error "  - $line"
+    done
+    return 1
+  fi
+  
+  # 提取文件名用于显示
+  local filename=$(echo "$asset_list" | grep "$(basename "$selected_url")" | awk '{print $1}')
+  log_info "选择文件: $filename"
+  log_info "下载地址: $selected_url"
+  
+  # 下载文件
+  wget -q --show-progress -O "$OBSIDIAN_APPIMAGE" "$selected_url"
 
   if [ $? -eq 0 ]; then
     chmod +x "$OBSIDIAN_APPIMAGE"
+    
+    # 验证文件可执行性和架构
+    if [ -x "$OBSIDIAN_APPIMAGE" ]; then
+      log_info "文件已设置为可执行"
+      
+      # 检查文件架构
+      local file_info=$(file "$OBSIDIAN_APPIMAGE" 2>/dev/null || echo "")
+      log_info "文件信息: $file_info"
+      
+      # 架构验证
+      if [[ "$system_arch" == "x86_64" ]] && [[ "$filename" == *"arm64"* || "$filename" == *"aarch64"* ]]; then
+        log_error "错误：系统是 x86_64，但下载的是 ARM64 版本"
+        log_error "文件名: $filename"
+        log_error "请手动下载 x86_64 版本"
+        rm -f "$OBSIDIAN_APPIMAGE"
+        return 1
+      elif [[ "$system_arch" == "aarch64" || "$system_arch" == "arm64" ]] && [[ ! "$filename" == *"arm64"* && ! "$filename" == *"aarch64"* ]]; then
+        log_warn "警告：系统是 ARM64，但下载的是无架构后缀的版本（可能是 x86_64）"
+      fi
+    else
+      log_error "无法设置文件为可执行"
+      return 1
+    fi
+    
     log_info "Obsidian 下载完成"
+    return 0
   else
     log_error "Obsidian 下载失败"
     return 1
