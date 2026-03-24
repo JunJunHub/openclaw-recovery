@@ -77,6 +77,8 @@ inject_secrets() {
 |--------|------|------|
 | SILICONFLOW_API_KEY | SiliconFlow 控制台 | 是 |
 | BAIDU_QIANFAN_API_KEY | 百度千帆控制台 | 是 |
+| TAVILY_API_KEY | Tavily 控制台 | 推荐 |
+| EXA_API_KEY | Exa 控制台 | 可选 |
 | FEISHU_APP_ID | 飞书开放平台 | 可选 |
 | FEISHU_APP_SECRET | 飞书开放平台 | 可选 |
 | GATEWAY_TOKEN | 自定义生成 | 是 |
@@ -125,3 +127,66 @@ inject_secrets() {
 openclaw gateway restart
 openclaw memory index --force
 ```
+
+## Web Search 配置
+
+### 搜索 Provider 对比
+
+| Provider | 免费额度 | 特点 | 推荐场景 |
+|----------|---------|------|---------|
+| **Tavily** | 1,000次/月 | AI 优化结果，结构化 | 默认推荐 |
+| **Exa** | 1,000次/月 | 神经网络搜索，语义理解 | 备用 |
+| **DuckDuckGo** | 无限 | 免费，无需 Key | 测试/备用 |
+
+### 配置示例
+
+```json
+{
+  "tools": {
+    "web": {
+      "search": {
+        "enabled": true,
+        "provider": "tavily"
+      }
+    }
+  },
+  "plugins": {
+    "entries": {
+      "tavily": {
+        "enabled": true,
+        "config": {
+          "webSearch": {
+            "apiKey": "{{TAVILY_API_KEY}}"
+          }
+        }
+      },
+      "exa": {
+        "enabled": true,
+        "config": {
+          "webSearch": {
+            "apiKey": "{{EXA_API_KEY}}"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+### 可用工具
+
+| 工具 | 说明 |
+|------|------|
+| `web_search` | 通用搜索（自动使用配置的 provider） |
+| `tavily_search` | Tavily 专用（支持深度/话题过滤） |
+| `tavily_extract` | URL 内容提取 |
+| `tavily_search` | Exa 专用（语义搜索） |
+
+### 获取 API Key
+
+- **Tavily**: https://tavily.com（支持国内网络）
+- **Exa**: https://exa.ai
+
+### 已弃用：Serper
+
+官方 OpenClaw 不支持 Serper 插件，请使用 Tavily 或 Exa 替代。

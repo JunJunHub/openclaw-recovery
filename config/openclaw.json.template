@@ -213,7 +213,12 @@
       "enabled": true,
       "allow": ["main", "media", "thinker", "monitor", "coder"]
     },
-    "web": {"search": {"enabled": true}},
+    "web": {
+      "search": {
+        "enabled": true,
+        "provider": "tavily"
+      }
+    },
     "elevated": {"enabled": true},
     "exec": {"security": "full"}
   },
@@ -273,7 +278,22 @@
     "entries": {
       "qqbot": {"enabled": false},
       "feishu": {"enabled": false},
-      "serper": {"enabled": true}
+      "tavily": {
+        "enabled": true,
+        "config": {
+          "webSearch": {
+            "apiKey": "{{TAVILY_API_KEY}}"
+          }
+        }
+      },
+      "exa": {
+        "enabled": true,
+        "config": {
+          "webSearch": {
+            "apiKey": "{{EXA_API_KEY}}"
+          }
+        }
+      }
     },
     "installs": {}
   }

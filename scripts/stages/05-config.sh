@@ -87,6 +87,8 @@ inject_secrets_silent() {
   # 替换占位符
   sed -i "s|{{SILICONFLOW_API_KEY}}|${SILICONFLOW_API_KEY}|g" "$output"
   sed -i "s|{{BAIDU_QIANFAN_API_KEY}}|${BAIDU_QIANFAN_API_KEY}|g" "$output"
+  sed -i "s|{{TAVILY_API_KEY}}|${TAVILY_API_KEY}|g" "$output"
+  sed -i "s|{{EXA_API_KEY}}|${EXA_API_KEY}|g" "$output"
   sed -i "s|{{FEISHU_APP_ID}}|${FEISHU_APP_ID}|g" "$output"
   sed -i "s|{{FEISHU_APP_SECRET}}|${FEISHU_APP_SECRET}|g" "$output"
   sed -i "s|{{GATEWAY_TOKEN}}|${GATEWAY_TOKEN}|g" "$output"

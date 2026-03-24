@@ -367,6 +367,12 @@ prompt_secrets() {
   read -p "百度千帆 API Key: " BAIDU_QIANFAN_API_KEY
   export BAIDU_QIANFAN_API_KEY
 
+  read -p "Tavily API Key (搜索，推荐): " TAVILY_API_KEY
+  export TAVILY_API_KEY
+
+  read -p "Exa API Key (搜索，可选): " EXA_API_KEY
+  export EXA_API_KEY
+
   read -p "飞书 App ID: " FEISHU_APP_ID
   export FEISHU_APP_ID
 
@@ -408,6 +414,8 @@ inject_secrets() {
   # 替换占位符
   sed -i "s|{{SILICONFLOW_API_KEY}}|${SILICONFLOW_API_KEY}|g" "$output"
   sed -i "s|{{BAIDU_QIANFAN_API_KEY}}|${BAIDU_QIANFAN_API_KEY}|g" "$output"
+  sed -i "s|{{TAVILY_API_KEY}}|${TAVILY_API_KEY}|g" "$output"
+  sed -i "s|{{EXA_API_KEY}}|${EXA_API_KEY}|g" "$output"
   sed -i "s|{{FEISHU_APP_ID}}|${FEISHU_APP_ID}|g" "$output"
   sed -i "s|{{FEISHU_APP_SECRET}}|${FEISHU_APP_SECRET}|g" "$output"
   sed -i "s|{{GATEWAY_TOKEN}}|${GATEWAY_TOKEN}|g" "$output"
