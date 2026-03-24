@@ -1,0 +1,278 @@
+{
+  "meta": {
+    "lastTouchedVersion": "0.1.8-fix.3"
+  },
+  "env": {
+    "shellEnv": {
+      "enabled": true
+    }
+  },
+  "wizard": {
+    "lastRunCommand": "doctor",
+    "lastRunMode": "local"
+  },
+  "update": {
+    "channel": "stable",
+    "checkOnStart": true
+  },
+  "browser": {
+    "enabled": true,
+    "controlUrl": "http://127.0.0.1:18791",
+    "executablePath": "/usr/bin/google-chrome-stable",
+    "headless": false,
+    "noSandbox": true,
+    "defaultProfile": "clawd"
+  },
+  "auth": {
+    "profiles": {
+      "siliconflow:default": {
+        "provider": "siliconflow",
+        "mode": "api_key"
+      }
+    },
+    "order": {
+      "siliconflow": [
+        "siliconflow:default"
+      ]
+    }
+  },
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "baiduqianfancodingplan": {
+        "baseUrl": "https://qianfan.baidubce.com/v2/coding",
+        "apiKey": "{{BAIDU_QIANFAN_API_KEY}}",
+        "api": "openai-completions",
+        "models": [
+          {
+            "id": "qianfan-code-latest",
+            "name": "qianfan-code-latest",
+            "reasoning": false,
+            "input": ["text"],
+            "cost": {
+              "input": 0.0025,
+              "output": 0.01,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 98304,
+            "maxTokens": 65536
+          }
+        ]
+      },
+      "siliconflow": {
+        "baseUrl": "https://api.siliconflow.cn/v1",
+        "apiKey": "{{SILICONFLOW_API_KEY}}",
+        "auth": "api-key",
+        "api": "openai-completions",
+        "models": [
+          {
+            "id": "Qwen/Qwen2.5-32B-Instruct",
+            "name": "SiliconFlow Auto",
+            "reasoning": false,
+            "input": ["text"],
+            "cost": {"input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0},
+            "contextWindow": 128000,
+            "maxTokens": 8192
+          },
+          {
+            "id": "Qwen/Qwen3-8B",
+            "name": "轻量模型",
+            "reasoning": false,
+            "input": ["text"],
+            "cost": {"input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0},
+            "contextWindow": 200000,
+            "maxTokens": 8192
+          },
+          {
+            "id": "Qwen/Qwen3-32B",
+            "name": "中文强，内容生成",
+            "reasoning": false,
+            "input": ["text"],
+            "cost": {"input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0},
+            "contextWindow": 200000,
+            "maxTokens": 8192
+          },
+          {
+            "id": "Pro/deepseek-ai/DeepSeek-V3.2",
+            "name": "主力模型，深度分析",
+            "reasoning": false,
+            "input": ["text"],
+            "cost": {"input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0},
+            "contextWindow": 200000,
+            "maxTokens": 8192
+          },
+          {
+            "id": "Pro/deepseek-ai/DeepSeek-R1",
+            "name": "深度推理",
+            "reasoning": false,
+            "input": ["text"],
+            "cost": {"input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0},
+            "contextWindow": 200000,
+            "maxTokens": 8192
+          },
+          {
+            "id": "Pro/zai-org/GLM-4.7",
+            "name": "中文理解，工具调用",
+            "reasoning": false,
+            "input": ["text"],
+            "cost": {"input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0},
+            "contextWindow": 200000,
+            "maxTokens": 8192
+          }
+        ]
+      }
+    }
+  },
+  "nodeHost": {
+    "browserProxy": {
+      "enabled": true
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "baiduqianfancodingplan/qianfan-code-latest",
+        "fallbacks": [
+          "baiduqianfancodingplan/qianfan-code-latest",
+          "siliconflow/Pro/deepseek-ai/DeepSeek-V3.2"
+        ]
+      },
+      "models": {
+        "baiduqianfancodingplan/qianfan-code-latest": {},
+        "siliconflow/Pro/Qwen/Qwen3-32B": {"alias": "qwen32"},
+        "siliconflow/Pro/deepseek-ai/DeepSeek-R1": {"alias": "DeepSeek-R1"},
+        "siliconflow/Pro/deepseek-ai/DeepSeek-V3.2": {"alias": "DeepSeek-V3.2"},
+        "siliconflow/Pro/zai-org/GLM-4.7": {"alias": "glm"},
+        "siliconflow/Qwen/Qwen2.5-32B-Instruct": {"alias": "SiliconFlow"},
+        "siliconflow/Qwen/Qwen3-8B": {"alias": "light"}
+      },
+      "workspace": "{{HOME}}/.openclaw/workspace",
+      "compaction": {"mode": "safeguard"},
+      "maxConcurrent": 4,
+      "subagents": {"maxConcurrent": 8},
+      "memorySearch": {
+        "enabled": true,
+        "provider": "local",
+        "local": {
+          "modelPath": "hf:ggml-org/embeddinggemma-300m-qat-q8_0-GGUF/embeddinggemma-300m-qat-Q8_0.gguf"
+        },
+        "query": {
+          "hybrid": {
+            "enabled": true,
+            "vectorWeight": 0.7,
+            "textWeight": 0.3
+          }
+        },
+        "cache": {"enabled": true}
+      }
+    },
+    "list": [
+      {
+        "id": "main",
+        "default": true,
+        "name": "MoltBot",
+        "workspace": "{{HOME}}/.openclaw/workspace",
+        "identity": {"name": "MoltBot", "emoji": "🐾"},
+        "subagents": {"allowAgents": ["media", "thinker", "monitor", "coder"]}
+      },
+      {
+        "id": "thinker",
+        "name": "沉思助手",
+        "workspace": "{{HOME}}/.openclaw/workspace-thinker",
+        "model": {"primary": "baiduqianfancodingplan/qianfan-code-latest"},
+        "identity": {"name": "Thinker", "emoji": "🤔"}
+      },
+      {
+        "id": "media",
+        "name": "自媒体",
+        "workspace": "{{HOME}}/.openclaw/workspace-media",
+        "model": {"primary": "baiduqianfancodingplan/qianfan-code-latest"},
+        "identity": {"name": "Media", "emoji": "✍️"}
+      },
+      {
+        "id": "monitor",
+        "name": "监控助手",
+        "workspace": "{{HOME}}/.openclaw/workspace-monitor",
+        "model": {"primary": "baiduqianfancodingplan/qianfan-code-latest"},
+        "identity": {"name": "Monitor", "emoji": "📡"}
+      },
+      {
+        "id": "coder",
+        "name": "编程能手",
+        "workspace": "{{HOME}}/.openclaw/workspace-coder",
+        "identity": {"name": "Coder", "emoji": "💻"}
+      }
+    ]
+  },
+  "tools": {
+    "profile": "full",
+    "agentToAgent": {
+      "enabled": true,
+      "allow": ["main", "media", "thinker", "monitor", "coder"]
+    },
+    "web": {"search": {"enabled": true}},
+    "elevated": {"enabled": true},
+    "exec": {"security": "full"}
+  },
+  "bindings": [],
+  "media": {"preserveFilenames": false},
+  "messages": {
+    "responsePrefix": "auto",
+    "ackReactionScope": "group-mentions"
+  },
+  "commands": {
+    "native": "auto",
+    "nativeSkills": "auto",
+    "bash": true,
+    "restart": true
+  },
+  "cron": {"enabled": true},
+  "hooks": {
+    "internal": {
+      "enabled": true,
+      "entries": {
+        "session-memory": {"enabled": true},
+        "boot-md": {"enabled": true},
+        "command-logger": {"enabled": true}
+      }
+    }
+  },
+  "web": {"enabled": true},
+  "channels": {
+    "feishu": {
+      "enabled": true,
+      "appId": "{{FEISHU_APP_ID}}",
+      "appSecret": "{{FEISHU_APP_SECRET}}",
+      "domain": "feishu",
+      "groupPolicy": "open",
+      "connectionMode": "websocket",
+      "blockStreaming": false,
+      "streaming": true,
+      "groups": {}
+    }
+  },
+  "canvasHost": {"enabled": true},
+  "gateway": {
+    "port": 18080,
+    "mode": "local",
+    "bind": "loopback",
+    "auth": {
+      "mode": "token",
+      "token": "{{GATEWAY_TOKEN}}",
+      "allowTailscale": true
+    },
+    "tailscale": {"mode": "off", "resetOnExit": false}
+  },
+  "skills": {"install": {"nodeManager": "npm"}},
+  "plugins": {
+    "enabled": true,
+    "deny": [],
+    "entries": {
+      "qqbot": {"enabled": false},
+      "feishu": {"enabled": false},
+      "serper": {"enabled": true}
+    },
+    "installs": {}
+  }
+}
