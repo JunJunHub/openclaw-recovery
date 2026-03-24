@@ -24,7 +24,7 @@ PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 # 默认配置
 INTERACTIVE=false
 STAGE=""
-VERSION="cn"
+VERSION="original"
 DRY_RUN=false
 
 # 解析参数
@@ -57,8 +57,8 @@ while [[ $# -gt 0 ]]; do
       echo "  --all              执行所有阶段"
       echo "  --stage <name>     执行指定阶段"
       echo "  --version <type>   选择 OpenClaw 版本:"
-      echo "                       cn       - 社区版 (openclaw-cn, 默认)"
-      echo "                       original - 原版 (openclaw)"
+      echo "                       cn       - 社区版 (openclaw-cn)"
+      echo "                       original - 原版 (openclaw, 默认)"
       echo "  --interactive      交互式输入敏感信息"
       echo "  --check            仅检测环境，不执行安装"
       echo ""
@@ -73,6 +73,8 @@ while [[ $# -gt 0 ]]; do
       echo "  dev-tools  - 编程工具 (Claude Code, GitHub CLI)"
       echo "  file-sharing - 文件共享配置 (Samba, CIFS)"
       echo "  obsidian   - Obsidian AppImage 安装"
+      echo "  python     - Python 工具 (pip, uv)"
+      echo "  golang     - Go 环境 (gvm, Go SDK)"
       exit 0
       ;;
     *)
@@ -108,6 +110,8 @@ show_execution_plan() {
     echo "  8. dev-tools  - 安装 Claude Code CLI + GitHub CLI"
     echo "  9. file-sharing - 配置 Samba 文件共享 (⚠️ 修改 smb.conf)"
     echo "  10. obsidian  - 安装 Obsidian AppImage"
+    echo "  11. python    - 安装 Python 工具 (pip, uv)"
+    echo "  12. golang    - 安装 Go 环境 (gvm, Go SDK)"
   else
     echo "【将执行的阶段】"
     echo "  $STAGE"
@@ -195,6 +199,8 @@ main() {
     run_stage "08-dev-tools" || exit 1
     run_stage "09-file-sharing" || exit 1
     run_stage "10-obsidian" || exit 1
+    run_stage "11-python" || exit 1
+    run_stage "12-golang" || exit 1
   elif [ -n "$STAGE" ]; then
     # 执行指定阶段
     case "$STAGE" in
@@ -208,6 +214,8 @@ main() {
       dev-tools) run_stage "08-dev-tools" || exit 1 ;;
       file-sharing) run_stage "09-file-sharing" || exit 1 ;;
       obsidian) run_stage "10-obsidian" || exit 1 ;;
+      python) run_stage "11-python" || exit 1 ;;
+      golang) run_stage "12-golang" || exit 1 ;;
       *)
         log_error "未知阶段: $STAGE"
         exit 1

@@ -18,7 +18,7 @@ nano config/secrets.env  # 填入真实值
 # 3. 环境检测（推荐先执行）
 ./scripts/install.sh --check
 
-# 4. 一键安装
+# 4. 一键安装（默认原版）
 ./scripts/install.sh --all
 ```
 
@@ -45,8 +45,17 @@ nano config/secrets.env  # 填入真实值
 
 | 参数 | 包名 | 说明 |
 |------|------|------|
-| `--version cn` | openclaw-cn@latest | 社区版（默认），飞书/钉钉/企微内置 |
-| `--version original` | openclaw@latest | 原版，功能最新 |
+| `--version original` | openclaw@latest | 原版（默认），功能最新 |
+| `--version cn` | openclaw-cn@latest | 社区版，飞书/钉钉/企微内置 |
+
+**社区版 vs 原版差异**：
+
+| 功能 | 社区版 | 原版 |
+|------|--------|------|
+| 飞书/钉钉/企微/QQ | ✅ 内置 | ❌ 需手动配置 |
+| 最新功能 | 稍有延迟 | ✅ 首发 |
+| Chrome MCP | ❌ | ✅ |
+| 国内网络适配 | ✅ | 需配置代理 |
 
 ### 使用示例
 
@@ -54,15 +63,16 @@ nano config/secrets.env  # 填入真实值
 # 环境检测
 ./scripts/install.sh --check
 
-# 一键安装（社区版）
+# 一键安装（原版，默认）
 ./scripts/install.sh --all
 
-# 一键安装（原版）
-./scripts/install.sh --all --version original
+# 一键安装（社区版）
+./scripts/install.sh --all --version cn
 
 # 单独安装某个阶段
 ./scripts/install.sh --stage node
-./scripts/install.sh --stage chrome
+./scripts/install.sh --stage python
+./scripts/install.sh --stage golang
 
 # 交互式输入敏感信息
 ./scripts/install.sh --all --interactive
@@ -74,16 +84,18 @@ nano config/secrets.env  # 填入真实值
 
 | 阶段 | 命令 | 安装内容 | 风险等级 |
 |------|------|---------|---------|
-| 01 | `--stage system` | 系统依赖 + SSH 服务 | 🟢 低 |
+| 01 | `--stage system` | 系统依赖 + SSH + 中文输入法 | 🟢 低 |
 | 02 | `--stage node` | NVM + Node.js v24 | 🟢 低 |
 | 03 | `--stage chrome` | Google Chrome | 🟢 低 |
-| 04 | `--stage openclaw` | OpenClaw CLI | 🟡 中（覆盖安装需确认）|
+| 04 | `--stage openclaw` | OpenClaw CLI + Serper 插件 | 🟡 中 |
 | 05 | `--stage config` | 配置文件恢复 | 🔴 高（覆盖配置）|
 | 06 | `--stage workspaces` | 工作空间初始化 | 🟢 低 |
 | 07 | `--stage verify` | 安装验证测试 | 🟢 低 |
-| 08 | `--stage dev-tools` | Claude Code + GitHub CLI | 🟡 中（覆盖安装需确认）|
+| 08 | `--stage dev-tools` | Claude Code + GitHub CLI | 🟡 中 |
 | 09 | `--stage file-sharing` | Samba 文件共享 | 🔴 高（修改 smb.conf）|
 | 10 | `--stage obsidian` | Obsidian AppImage | 🟢 低 |
+| 11 | `--stage python` | Python 工具 (pip, uv) | 🟢 低 |
+| 12 | `--stage golang` | Go 环境 (gvm, Go SDK) | 🟢 低 |
 
 ---
 
@@ -102,10 +114,14 @@ nano config/secrets.env  # 填入真实值
 | net-tools | 网络配置 (ifconfig) | system |
 | htop | 进程监控 | system |
 | tmux | 终端复用 | system |
+| tree | 目录树显示 | system |
+| sqlite3 | SQLite 数据库 | system |
 | openssh-server | SSH 远程登录 | system |
 | open-vm-tools | VMware 增强工具 | system |
 | cifs-utils | 挂载 Windows 共享 | system |
 | samba | 共享文件夹给 Windows | system |
+| ibus | 输入法框架 | system |
+| ibus-pinyin | 中文拼音输入法 | system |
 
 ### 开发环境
 
@@ -120,9 +136,42 @@ nano config/secrets.env  # 填入真实值
 
 | 组件 | 说明 | 阶段 |
 |------|------|------|
-| OpenClaw CLI | 主程序（社区版/原版可选）| openclaw |
+| OpenClaw CLI | 主程序（原版/社区版可选）| openclaw |
+| Serper 插件 | 搜索插件 | openclaw |
 | openclaw.json | 配置文件（从模板恢复）| config |
 | 工作空间 | 5 个 Agent 工作空间 | workspaces |
+
+### Python 工具
+
+| 工具 | 说明 | 阶段 |
+|------|------|------|
+| pip | Python 包管理器 | python |
+| uv | 快速 Python 包管理器 | python |
+| black | 代码格式化 | python |
+| flake8 | 代码检查 | python |
+| pytest | 测试框架 | python |
+| jupyter | Jupyter Notebook | python |
+| ipython | 交互式 Python | python |
+
+**Python 镜像配置**：
+- pip 镜像：https://pypi.tuna.tsinghua.edu.cn/simple
+- uv 镜像：https://pypi.tuna.tsinghua.edu.cn/simple
+
+### Go 环境
+
+| 组件 | 说明 | 阶段 |
+|------|------|------|
+| gvm | Go 版本管理器 | golang |
+| Go SDK | 最新稳定版 (1.21+) | golang |
+| goimports | 代码格式化 | golang |
+| gopls | 语言服务器 | golang |
+| dlv | 调试器 | golang |
+| golangci-lint | 代码检查 | golang |
+| air | 热重载开发工具 | golang |
+
+**Go 镜像配置**：
+- GOPROXY：https://goproxy.cn
+- GOSUMDB：sum.golang.google.cn
 
 ### 配置文件恢复
 
@@ -140,6 +189,7 @@ nano config/secrets.env  # 填入真实值
 | `{{FEISHU_APP_ID}}` | 飞书应用 ID | https://open.feishu.cn/app |
 | `{{FEISHU_APP_SECRET}}` | 飞书应用密钥 | https://open.feishu.cn/app |
 | `{{GATEWAY_TOKEN}}` | Gateway 认证令牌 | 自动生成或手动指定 |
+| `{{SERPER_API_KEY}}` | Serper 搜索 API Key | https://serper.dev |
 
 ### 工作空间
 
@@ -185,6 +235,66 @@ nano config/secrets.env  # 填入真实值
 
 ---
 
+## 中文输入法配置
+
+安装完成后，中文输入法已自动安装，但需要手动配置：
+
+### 配置步骤
+
+1. **重启系统**（确保输入法框架生效）
+   ```bash
+   sudo reboot
+   ```
+
+2. **配置输入法**
+   - 在桌面环境设置中添加中文输入法
+   - 或在终端运行：`ibus-setup`
+
+3. **切换输入法**
+   - 默认快捷键：`Super + Space`（Windows 键 + 空格）
+   - 中英切换：`Shift`
+
+### 已安装组件
+
+- ibus 输入法框架
+- ibus-pinyin 拼音输入法
+- GTK/Qt GUI 工具包支持
+
+---
+
+## Serper 搜索插件
+
+OpenClaw 默认安装 Serper 搜索插件，用于网络搜索功能。
+
+### 配置 Serper API Key
+
+1. **获取 API Key**
+   - 访问：https://serper.dev
+   - 注册账号并获取 API Key
+
+2. **配置到 OpenClaw**
+   ```bash
+   # 编辑配置文件
+   nano ~/.openclaw/openclaw.json
+   
+   # 在 plugins 配置中添加
+   {
+     "plugins": {
+       "serper": {
+         "apiKey": "YOUR_SERPER_API_KEY"
+       }
+     }
+   }
+   ```
+
+3. **或通过 secrets.env 配置**
+   ```bash
+   # 添加到 config/secrets.env
+   SERPER_API_KEY=your_api_key_here
+   ```
+
+---
+
 ## 敏感信息配置
 
 ### 配置文件模板
@@ -198,6 +308,9 @@ SILICONFLOW_API_KEY=sk-xxxxxxxxxxxxxxxx
 
 # 百度千帆 (ERNIE 等模型)
 BAIDU_QIANFAN_API_KEY=bce-v3/xxxxxxxxxxxxxxxx
+
+# Serper 搜索 API
+SERPER_API_KEY=xxxxxxxxxxxxxxxx
 
 # ============ 飞书配置 ============
 # 用于飞书消息通道
@@ -215,6 +328,7 @@ GATEWAY_TOKEN=
 |--------|----------|
 | SiliconFlow | https://cloud.siliconflow.cn/account/ak |
 | 百度千帆 | https://console.bce.baidu.com/qianfan/ais/console/applicationConsole/application/v2 |
+| Serper | https://serper.dev |
 | 飞书应用 | https://open.feishu.cn/app → 创建企业自建应用 |
 
 ---
@@ -278,6 +392,18 @@ export NVM_NODEJS_ORG_MIRROR=https://npmmirror.com/mirrors/node
 nvm install 24.14.0
 ```
 
+### Q: Go 下载慢
+```bash
+# gvm 已配置代理，如需手动设置
+export GOPROXY=https://goproxy.cn,direct
+```
+
+### Q: Python 包下载慢
+```bash
+# pip 已配置清华镜像，如需手动设置
+pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+```
+
 ### Q: 如何恢复备份的配置？
 ```bash
 # 查找备份文件
@@ -286,6 +412,15 @@ ls -la ~/.openclaw/openclaw.json.bak.*
 # 恢复
 cp ~/.openclaw/openclaw.json.bak.20260324120000 ~/.openclaw/openclaw.json
 ```
+
+### Q: 中文输入法不生效？
+1. 确保已重启系统
+2. 检查环境变量：
+   ```bash
+   echo $GTK_IM_MODULE  # 应显示 ibus
+   echo $QT_IM_MODULE   # 应显示 ibus
+   ```
+3. 运行 `ibus-setup` 重新配置
 
 ---
 
@@ -318,7 +453,9 @@ openclaw-recovery/
 │       ├── 07-verify.sh
 │       ├── 08-dev-tools.sh
 │       ├── 09-file-sharing.sh
-│       └── 10-obsidian.sh
+│       ├── 10-obsidian.sh
+│       ├── 11-python.sh
+│       └── 12-golang.sh
 └── config/
     ├── openclaw.json.template  # 配置模板
     ├── secrets.env.example     # 敏感信息示例

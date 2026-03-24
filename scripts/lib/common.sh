@@ -18,8 +18,8 @@ log_step() { echo -e "${BLUE}[STEP]${NC} $1"; }
 OPENCLAW_CN_VERSION="openclaw-cn@latest"
 OPENCLAW_ORIGINAL_VERSION="openclaw@latest"
 
-# 当前选择的版本（默认社区版）
-OPENCLAW_PACKAGE="$OPENCLAW_CN_VERSION"
+# 当前选择的版本（默认原版）
+OPENCLAW_PACKAGE="$OPENCLAW_ORIGINAL_VERSION"
 
 # 设置 OpenClaw 版本
 set_openclaw_version() {
@@ -34,8 +34,8 @@ set_openclaw_version() {
       log_info "选择原版: $OPENCLAW_PACKAGE"
       ;;
     *)
-      log_warn "未知版本 '$version'，使用默认社区版"
-      OPENCLAW_PACKAGE="$OPENCLAW_CN_VERSION"
+      log_warn "未知版本 '$version'，使用默认原版"
+      OPENCLAW_PACKAGE="$OPENCLAW_ORIGINAL_VERSION"
       ;;
   esac
 }
@@ -88,7 +88,7 @@ check_environment() {
 
   # 系统工具
   echo "【系统工具】"
-  local tools=("curl" "wget" "git" "vim" "jq" "htop" "tmux" "node" "npm")
+  local tools=("curl" "wget" "git" "vim" "jq" "htop" "tmux" "tree" "sqlite3" "node" "npm")
   for tool in "${tools[@]}"; do
     if command_exists "$tool"; then
       local version=""
@@ -102,6 +102,34 @@ check_environment() {
       echo "  ❌ $tool 未安装"
     fi
   done
+  echo ""
+
+  # 中文输入法
+  echo "【中文输入法】"
+  if command_exists "ibus"; then
+    echo "  ✅ ibus 输入法框架已安装"
+  else
+    echo "  ❌ ibus 输入法框架未安装"
+  fi
+  
+  if dpkg -l | grep -q "ibus-pinyin" 2>/dev/null; then
+    echo "  ✅ ibus-pinyin 拼音输入法已安装"
+  else
+    echo "  ❌ ibus-pinyin 拼音输入法未安装"
+  fi
+  
+  # 检查环境变量
+  if [ -n "$GTK_IM_MODULE" ] && [ "$GTK_IM_MODULE" = "ibus" ]; then
+    echo "  ✅ GTK_IM_MODULE=ibus (已配置)"
+  else
+    echo "  ⚠️  GTK_IM_MODULE 未配置为 ibus"
+  fi
+  
+  if [ -n "$QT_IM_MODULE" ] && [ "$QT_IM_MODULE" = "ibus" ]; then
+    echo "  ✅ QT_IM_MODULE=ibus (已配置)"
+  else
+    echo "  ⚠️  QT_IM_MODULE 未配置为 ibus"
+  fi
   echo ""
 
   # SSH 服务
@@ -171,6 +199,66 @@ check_environment() {
     echo "  ✅ GitHub CLI 已安装 ($(gh --version 2>/dev/null | head -1 | awk '{print $3}'))"
   else
     echo "  ❌ GitHub CLI 未安装"
+  fi
+  echo ""
+
+  # Python 环境
+  echo "【Python 环境】"
+  if command_exists "python3"; then
+    python_version=$(python3 --version 2>/dev/null | awk '{print $2}')
+    echo "  ✅ Python3: $python_version"
+  else
+    echo "  ❌ Python3 未安装"
+  fi
+  
+  if command_exists "pip3"; then
+    pip_version=$(pip3 --version 2>/dev/null | awk '{print $2}')
+    echo "  ✅ pip3: $pip_version"
+  else
+    echo "  ❌ pip3 未安装"
+  fi
+  
+  if command_exists "uv"; then
+    uv_version=$(uv --version 2>/dev/null | awk '{print $2}')
+    echo "  ✅ uv: $uv_version"
+  else
+    echo "  ❌ uv 未安装"
+  fi
+  
+  # 检查虚拟环境
+  if [ -d "$HOME/.venv_example" ]; then
+    echo "  ✅ 示例虚拟环境: ~/.venv_example"
+  else
+    echo "  ❌ 示例虚拟环境未创建"
+  fi
+  echo ""
+
+  # Go 环境
+  echo "【Go 环境】"
+  if command_exists "go"; then
+    go_version=$(go version 2>/dev/null | awk '{print $3}')
+    echo "  ✅ Go SDK: $go_version"
+  else
+    echo "  ❌ Go SDK 未安装"
+  fi
+  
+  if [ -d "$HOME/.gvm" ]; then
+    echo "  ✅ gvm: 已安装"
+  else
+    echo "  ❌ gvm 未安装"
+  fi
+  
+  if command_exists "gvm"; then
+    echo "  ✅ gvm 命令行可用"
+  else
+    echo "  ❌ gvm 命令行不可用"
+  fi
+  
+  # 检查示例项目
+  if [ -d "$HOME/go/src/example.com/hello" ]; then
+    echo "  ✅ 示例项目: ~/go/src/example.com/hello"
+  else
+    echo "  ❌ 示例项目未创建"
   fi
   echo ""
 
