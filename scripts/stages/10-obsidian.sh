@@ -174,27 +174,43 @@ create_launcher_script() {
   log_step "创建启动脚本..."
 
   local script_path="$HOME/.local/bin/obsidian"
-  mkdir -p "$(dirname "$script_path")"
+  local script_dir="$(dirname "$script_path")"
+  mkdir -p "$script_dir"
 
-  cat > "$script_path" << 'EOF'
+  # 删除旧的符号链接（如果存在）
+  if [ -L "$script_path" ]; then
+    rm -f "$script_path"
+    log_info "已删除旧的符号链接"
+  fi
+
+  # 创建启动脚本（带 --no-sandbox 参数）
+  cat > "$script_path" << 'SCRIPT'
 #!/bin/bash
 # Obsidian 启动脚本
-# 支持命令行启动和后台运行
+# 虚拟机环境需要 --no-sandbox 参数
 
 OBSIDIAN_APP="$HOME/Applications/Obsidian.AppImage"
 
 if [ ! -f "$OBSIDIAN_APP" ]; then
   echo "错误: Obsidian 未安装"
+  echo "位置应为: $OBSIDIAN_APP"
   echo "请运行: openclaw-recovery --stage obsidian"
   exit 1
 fi
 
 # 后台运行（虚拟机环境需要 --no-sandbox）
 nohup "$OBSIDIAN_APP" --no-sandbox "$@" > /dev/null 2>&1 &
-EOF
+echo "Obsidian 已启动"
+SCRIPT
 
   chmod +x "$script_path"
   log_info "启动脚本已创建: $script_path"
+
+  # 确保 ~/.local/bin 在 PATH 中
+  if ! echo "$PATH" | tr ':' '\n' | grep -qF "$HOME/.local/bin"; then
+    log_warn "~/.local/bin 不在 PATH 中"
+    log_info "请添加到 ~/.bashrc: export PATH=\"\$HOME/.local/bin:\$PATH\""
+  fi
 }
 
 # 显示使用说明
