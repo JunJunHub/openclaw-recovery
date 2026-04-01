@@ -2,9 +2,10 @@
 # 阶段 2: Node.js 安装 (通过 NVM)
 
 NVM_VERSION="v0.40.1"
-NODE_VERSION="v24.14.0"
+# OpenClaw 推荐的 Node.js 版本
+NODE_VERSION="22"
 
-log_step "安装 Node.js $NODE_VERSION (通过 NVM)..."
+log_step "安装 Node.js $NODE_VERSION (通过 NVM，OpenClaw 推荐)..."
 
 # 检查是否已安装 NVM
 if [ -d "$HOME/.nvm" ]; then
@@ -32,20 +33,21 @@ export NVM_DIR="$HOME/.nvm"
 # 检查 Node.js 版本
 CURRENT_NODE=$(node --version 2>/dev/null || echo "none")
 
-if [ "$CURRENT_NODE" = "$NODE_VERSION" ]; then
-  log_info "Node.js $NODE_VERSION 已安装"
+# 检查是否已安装 v22.x（OpenClaw 推荐）
+if [[ "$CURRENT_NODE" == v22* ]]; then
+  log_info "Node.js $CURRENT_NODE 已安装 (OpenClaw 推荐 v22.x)"
 else
-  log_info "安装 Node.js $NODE_VERSION..."
+  log_info "安装 Node.js $NODE_VERSION (OpenClaw 推荐 v22.x)..."
 
   # 使用国内镜像
   export NVM_NODEJS_ORG_MIRROR="https://npmmirror.com/mirrors/node"
 
-  # 安装 Node.js
+  # 安装 Node.js（OpenClaw 推荐 v22）
   nvm install "$NODE_VERSION"
   nvm use "$NODE_VERSION"
   nvm alias default "$NODE_VERSION"
 
-  log_info "Node.js 安装完成: $(node --version)"
+  log_info "Node.js 安装完成: $(node --version) (OpenClaw 推荐)"
 fi
 
 # 配置 npm 淘宝镜像

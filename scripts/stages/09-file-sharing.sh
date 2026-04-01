@@ -3,9 +3,9 @@
 
 log_info "=== 阶段 9: 文件共享配置 ==="
 
-# 挂载点配置
-WIN_MOUNT_POINT="/home/mnt/win"
-SHARE_DIR="/home/Share"
+# 挂载点配置（使用 /home/$USER 确保变量正确展开）
+WIN_MOUNT_POINT="/home/$USER/mnt/win"
+SHARE_DIR="/home/$USER/Share"
 
 # 创建挂载目录
 setup_mount_points() {
@@ -37,11 +37,11 @@ setup_samba() {
   # 创建预览配置
   local temp_conf=$(mktemp)
   cp "$smb_conf" "$temp_conf"
-  cat >> "$temp_conf" << 'EOF'
+  cat >> "$temp_conf" << EOF
 
 # ===== OpenClaw Recovery 自动配置 =====
 [Share]
-   path = /home/Share
+   path = $SHARE_DIR
    browseable = yes
    read only = no
    create mask = 0777
@@ -62,9 +62,9 @@ EOF
   echo "将添加以下配置到 /etc/samba/smb.conf:"
   echo ""
   echo "───────────────────────────────────────"
-  cat << 'EOF'
+  cat << EOF
 [Share]
-   path = /home/Share
+   path = $SHARE_DIR
    browseable = yes
    read only = no
    create mask = 0777
@@ -91,12 +91,12 @@ EOF
   sudo cp "$smb_conf" "${smb_conf}.bak"
   log_info "已备份原配置: ${smb_conf}.bak"
 
-  # 添加共享配置
-  sudo tee -a "$smb_conf" > /dev/null << 'EOF'
+  # 添加共享配置（使用用户主目录，无需 sudo 创建）
+  sudo tee -a "$smb_conf" > /dev/null << EOF
 
 # ===== OpenClaw Recovery 自动配置 =====
 [Share]
-   path = /home/Share
+   path = $SHARE_DIR
    browseable = yes
    read only = no
    create mask = 0777
@@ -108,7 +108,7 @@ EOF
    force group = nogroup
 EOF
 
-  log_info "Samba 配置已添加"
+  log_info "Samba 配置已添加 (路径: $SHARE_DIR)"
 
   # 重启 Samba 服务
   sudo systemctl restart smbd
@@ -137,7 +137,7 @@ SHARE_NAME="${2:-shared}"
 WIN_USER="${3:-guest}"
 WIN_PASS="${4:-}"
 
-MOUNT_POINT="/home/mnt/win"
+MOUNT_POINT="/home/$USER/mnt/win"
 
 echo "挂载 Windows 共享: //$WIN_IP/$SHARE_NAME"
 echo "挂载点: $MOUNT_POINT"
@@ -177,7 +177,7 @@ create_unmount_script() {
 #!/bin/bash
 # 卸载 Windows 共享文件夹
 
-MOUNT_POINT="/home/mnt/win"
+MOUNT_POINT="/home/$USER/mnt/win"
 
 echo "卸载: $MOUNT_POINT"
 sudo umount "$MOUNT_POINT" 2>/dev/null || sudo umount -l "$MOUNT_POINT"

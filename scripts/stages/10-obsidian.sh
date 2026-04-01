@@ -8,6 +8,20 @@ OBSIDIAN_APPIMAGE="$OBSIDIAN_DIR/Obsidian.AppImage"
 # 旧版本回退 URL（当 API 不可用时使用）
 OBSIDIAN_URL="https://github.com/obsidianmd/obsidian-releases/releases/download/v1.12.7/Obsidian-1.12.7.AppImage"
 
+# 安装依赖（AppImage 运行需要）
+install_dependencies() {
+  log_step "安装依赖..."
+
+  # libfuse2 是 AppImage 必需的
+  if ! dpkg -l | grep -q libfuse2; then
+    log_info "安装 libfuse2..."
+    sudo apt update
+    sudo apt install -y libfuse2
+  else
+    log_info "libfuse2 已安装"
+  fi
+}
+
 # 创建应用目录
 setup_directories() {
   mkdir -p "$OBSIDIAN_DIR"
@@ -138,7 +152,7 @@ create_desktop_entry() {
 [Desktop Entry]
 Name=Obsidian
 Comment=Obsidian Note Taking App
-Exec=$OBSIDIAN_APPIMAGE %U
+Exec=$OBSIDIAN_APPIMAGE --no-sandbox %U
 Icon=$icon_path
 Terminal=false
 Type=Application
@@ -175,8 +189,8 @@ if [ ! -f "$OBSIDIAN_APP" ]; then
   exit 1
 fi
 
-# 后台运行
-nohup "$OBSIDIAN_APP" "$@" > /dev/null 2>&1 &
+# 后台运行（虚拟机环境需要 --no-sandbox）
+nohup "$OBSIDIAN_APP" --no-sandbox "$@" > /dev/null 2>&1 &
 EOF
 
   chmod +x "$script_path"
@@ -205,6 +219,7 @@ show_usage() {
 
 # 主流程
 main() {
+  install_dependencies
   setup_directories
   download_obsidian
   create_desktop_entry
