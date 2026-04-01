@@ -6,7 +6,7 @@ log_step "安装 Google Chrome..."
 # 检查是否已安装
 if command -v google-chrome &> /dev/null; then
   log_info "Chrome 已安装: $(google-chrome --version)"
-  exit 0
+  return 0  # 使用 return 而不是 exit，因为是 source 加载
 fi
 
 log_info "下载 Google Chrome .deb 包..."
