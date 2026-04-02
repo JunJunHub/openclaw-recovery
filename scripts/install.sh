@@ -112,6 +112,7 @@ show_execution_plan() {
     echo "  10. obsidian  - 安装 Obsidian AppImage"
     echo "  11. python    - 安装 Python 工具 (pip, uv)"
     echo "  12. golang    - 安装 Go 环境 (gvm, Go SDK)"
+    echo "  13. github-hosts - 配置 GitHub hosts (解决访问不稳定)"
   else
     echo "【将执行的阶段】"
     echo "  $STAGE"
@@ -201,6 +202,7 @@ main() {
     run_stage "10-obsidian" || exit 1
     run_stage "11-python" || exit 1
     run_stage "12-golang" || exit 1
+    run_stage "13-github-hosts" || exit 1
   elif [ -n "$STAGE" ]; then
     # 执行指定阶段
     case "$STAGE" in
@@ -216,6 +218,7 @@ main() {
       obsidian) run_stage "10-obsidian" || exit 1 ;;
       python) run_stage "11-python" || exit 1 ;;
       golang) run_stage "12-golang" || exit 1 ;;
+      github-hosts) run_stage "13-github-hosts" || exit 1 ;;
       *)
         log_error "未知阶段: $STAGE"
         exit 1
