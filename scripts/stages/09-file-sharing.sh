@@ -49,8 +49,6 @@ setup_samba() {
    public = yes
    writable = yes
    guest ok = yes
-   force user = nobody
-   force group = nogroup
 EOF
 
   # 显示差异
@@ -72,8 +70,6 @@ EOF
    public = yes
    writable = yes
    guest ok = yes
-   force user = nobody
-   force group = nogroup
 EOF
   echo "───────────────────────────────────────"
   echo ""
@@ -104,8 +100,6 @@ EOF
    public = yes
    writable = yes
    guest ok = yes
-   force user = nobody
-   force group = nogroup
 EOF
 
   log_info "Samba 配置已添加 (路径: $SHARE_DIR)"
