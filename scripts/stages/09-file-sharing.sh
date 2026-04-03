@@ -3,9 +3,10 @@
 
 log_info "=== 阶段 9: 文件共享配置 ==="
 
-# 挂载点配置（使用 /home/$USER 确保变量正确展开）
+# 挂载点配置
 WIN_MOUNT_POINT="/home/$USER/mnt/win"
-SHARE_DIR="/home/$USER/Share"
+# 共享目录放在 /home 下，避免家目录权限限制
+SHARE_DIR="/home/Share"
 
 # 创建挂载目录
 setup_mount_points() {
@@ -16,8 +17,9 @@ setup_mount_points() {
   sudo chown "$USER:$USER" "$WIN_MOUNT_POINT"
   log_info "创建 Windows 挂载点: $WIN_MOUNT_POINT"
 
-  # 共享给 Windows 的目录
-  mkdir -p "$SHARE_DIR"
+  # 共享给 Windows 的目录（/home 权限 755，Windows 可访问）
+  sudo mkdir -p "$SHARE_DIR"
+  sudo chown "$USER:$USER" "$SHARE_DIR"
   chmod 777 "$SHARE_DIR"
   log_info "创建共享目录: $SHARE_DIR"
 }
@@ -87,7 +89,7 @@ EOF
   sudo cp "$smb_conf" "${smb_conf}.bak"
   log_info "已备份原配置: ${smb_conf}.bak"
 
-  # 添加共享配置（使用用户主目录，无需 sudo 创建）
+  # 添加共享配置
   sudo tee -a "$smb_conf" > /dev/null << EOF
 
 # ===== OpenClaw Recovery 自动配置 =====
