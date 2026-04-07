@@ -91,7 +91,7 @@ nano config/secrets.env  # 填入真实值
 | 05 | `--stage openclaw` | OpenClaw CLI + Serper 插件 | 🟡 中 |
 | 06 | `--stage config` | 配置文件恢复 | 🔴 高（覆盖配置）|
 | 07 | `--stage workspaces` | 工作空间初始化 | 🟢 低 |
-| 08 | `--stage dev-tools` | Claude Code + GitHub CLI | 🟡 中 |
+| 08 | `--stage dev-tools` | Claude Code + GitHub CLI + CC Switch | 🟡 中 |
 | 09 | `--stage file-sharing` | Samba 文件共享 | 🔴 高（修改 smb.conf）|
 | 10 | `--stage obsidian` | Obsidian AppImage | 🟢 低 |
 | 11 | `--stage python` | Python 工具 (pip, uv) | 🟢 低 |
