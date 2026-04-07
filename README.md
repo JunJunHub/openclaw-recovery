@@ -216,6 +216,23 @@ nano config/secrets.env  # 填入真实值
 |------|------|------|
 | Claude Code CLI | AI 编程助手 | dev-tools |
 | GitHub CLI | Git 命令行工具 | dev-tools |
+| CC Switch | AI 编程工具管理器 | dev-tools |
+
+**CC Switch 功能**：
+- 跨平台桌面应用（支持 macOS/Linux/Windows）
+- 统一管理多个 AI 编程工具：
+  - Claude Code
+  - Codex
+  - OpenCode
+  - OpenClaw
+  - Gemini CLI
+- Provider 热切换、模型管理、MCP 配置
+- WebDAV 同步、多语言支持
+
+**CC Switch 安装位置**：
+- AppImage: `~/Applications/CC-Switch-*.AppImage`
+- 启动命令: `cc-switch`
+- 桌面快捷方式: 应用菜单 → CC Switch
 
 ### Qt 开发环境
 

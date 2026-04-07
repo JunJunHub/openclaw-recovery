@@ -200,6 +200,11 @@ check_environment() {
   else
     echo "  ❌ GitHub CLI 未安装"
   fi
+  if command_exists "cc-switch" || [ -f "$HOME/Applications/CC-Switch"*.AppImage ]; then
+    echo "  ✅ CC Switch 已安装"
+  else
+    echo "  ❌ CC Switch 未安装"
+  fi
   echo ""
 
   # Python 环境
