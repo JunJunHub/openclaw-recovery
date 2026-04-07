@@ -63,19 +63,20 @@ while [[ $# -gt 0 ]]; do
       echo "  --check            仅检测环境，不执行安装"
       echo ""
       echo "可用阶段:"
-      echo "  system     - 系统依赖安装"
-      echo "  node       - Node.js 安装"
-      echo "  chrome     - Chrome 浏览器安装"
-      echo "  openclaw   - OpenClaw 安装"
-      echo "  config     - 配置恢复"
-      echo "  workspaces - Workspace 恢复"
-      echo "  verify     - 验证测试"
-      echo "  dev-tools  - 编程工具 (Claude Code, GitHub CLI)"
+      echo "  system       - 系统依赖安装"
+      echo "  github-hosts - GitHub hosts 配置（解决访问不稳定）"
+      echo "  node         - Node.js 安装"
+      echo "  chrome       - Chrome 浏览器安装"
+      echo "  openclaw     - OpenClaw 安装"
+      echo "  config       - 配置恢复"
+      echo "  workspaces   - Workspace 恢复"
+      echo "  dev-tools    - 编程工具 (Claude Code, GitHub CLI)"
       echo "  file-sharing - 文件共享配置 (Samba, CIFS)"
-      echo "  obsidian   - Obsidian AppImage 安装"
-      echo "  python     - Python 工具 (pip, uv)"
-      echo "  golang     - Go 环境 (gvm, Go SDK)"
-      echo "  qt         - Qt 开发环境 (Qt 6.8 LTS)"
+      echo "  obsidian     - Obsidian AppImage 安装"
+      echo "  python       - Python 工具 (pip, uv)"
+      echo "  golang       - Go 环境 (gvm, Go SDK)"
+      echo "  qt           - Qt 开发环境 (Qt 6.8 LTS)"
+      echo "  verify       - 全量验证测试"
       exit 0
       ;;
     *)
@@ -101,20 +102,20 @@ show_execution_plan() {
 
   if [ "$STAGE" = "all" ]; then
     echo "【将执行的阶段】"
-    echo "  1. system     - 安装系统依赖 (curl, wget, git, vim, htop, tmux, SSH)"
-    echo "  2. node       - 安装 NVM + Node.js v24"
-    echo "  3. chrome     - 安装 Google Chrome"
-    echo "  4. openclaw   - 安装 OpenClaw ($OPENCLAW_PACKAGE)"
-    echo "  5. config     - 恢复配置文件 (⚠️ 可能覆盖现有配置)"
-    echo "  6. workspaces - 创建工作空间目录"
-    echo "  7. verify     - 验证安装"
-    echo "  8. dev-tools  - 安装 Claude Code CLI + GitHub CLI"
+    echo "  1. system       - 安装系统依赖 (curl, wget, git, vim, htop, tmux, SSH)"
+    echo "  2. github-hosts - 配置 GitHub hosts (解决访问不稳定)"
+    echo "  3. node         - 安装 NVM + Node.js v24"
+    echo "  4. chrome       - 安装 Google Chrome"
+    echo "  5. openclaw     - 安装 OpenClaw ($OPENCLAW_PACKAGE)"
+    echo "  6. config       - 恢复配置文件 (⚠️ 可能覆盖现有配置)"
+    echo "  7. workspaces   - 创建工作空间目录"
+    echo "  8. dev-tools    - 安装 Claude Code CLI + GitHub CLI"
     echo "  9. file-sharing - 配置 Samba 文件共享 (⚠️ 修改 smb.conf)"
-    echo "  10. obsidian  - 安装 Obsidian AppImage"
-    echo "  11. python    - 安装 Python 工具 (pip, uv)"
-    echo "  12. golang    - 安装 Go 环境 (gvm, Go SDK)"
-    echo "  13. github-hosts - 配置 GitHub hosts (解决访问不稳定)"
-    echo "  14. qt         - 安装 Qt 6.8 LTS 开发环境"
+    echo "  10. obsidian    - 安装 Obsidian AppImage"
+    echo "  11. python      - 安装 Python 工具 (pip, uv)"
+    echo "  12. golang      - 安装 Go 环境 (gvm, Go SDK)"
+    echo "  13. qt          - 安装 Qt 6.8 LTS 开发环境 (耗时较长)"
+    echo "  14. verify      - 全量验证安装结果"
   else
     echo "【将执行的阶段】"
     echo "  $STAGE"
@@ -193,36 +194,36 @@ main() {
   if [ "$STAGE" = "all" ]; then
     # 执行所有阶段
     run_stage "01-system" || exit 1
-    run_stage "02-node" || exit 1
-    run_stage "03-chrome" || exit 1
-    run_stage "04-openclaw" || exit 1
-    run_stage "05-config" || exit 1
-    run_stage "06-workspaces" || exit 1
-    run_stage "07-verify" || exit 1
+    run_stage "02-github-hosts" || exit 1
+    run_stage "03-node" || exit 1
+    run_stage "04-chrome" || exit 1
+    run_stage "05-openclaw" || exit 1
+    run_stage "06-config" || exit 1
+    run_stage "07-workspaces" || exit 1
     run_stage "08-dev-tools" || exit 1
     run_stage "09-file-sharing" || exit 1
     run_stage "10-obsidian" || exit 1
     run_stage "11-python" || exit 1
     run_stage "12-golang" || exit 1
-    run_stage "13-github-hosts" || exit 1
-    run_stage "14-qt" || exit 1
+    run_stage "13-qt" || exit 1
+    run_stage "14-verify" || exit 1
   elif [ -n "$STAGE" ]; then
     # 执行指定阶段
     case "$STAGE" in
       system) run_stage "01-system" || exit 1 ;;
-      node) run_stage "02-node" || exit 1 ;;
-      chrome) run_stage "03-chrome" || exit 1 ;;
-      openclaw) run_stage "04-openclaw" || exit 1 ;;
-      config) run_stage "05-config" || exit 1 ;;
-      workspaces) run_stage "06-workspaces" || exit 1 ;;
-      verify) run_stage "07-verify" || exit 1 ;;
+      github-hosts) run_stage "02-github-hosts" || exit 1 ;;
+      node) run_stage "03-node" || exit 1 ;;
+      chrome) run_stage "04-chrome" || exit 1 ;;
+      openclaw) run_stage "05-openclaw" || exit 1 ;;
+      config) run_stage "06-config" || exit 1 ;;
+      workspaces) run_stage "07-workspaces" || exit 1 ;;
       dev-tools) run_stage "08-dev-tools" || exit 1 ;;
       file-sharing) run_stage "09-file-sharing" || exit 1 ;;
       obsidian) run_stage "10-obsidian" || exit 1 ;;
       python) run_stage "11-python" || exit 1 ;;
       golang) run_stage "12-golang" || exit 1 ;;
-      github-hosts) run_stage "13-github-hosts" || exit 1 ;;
-      qt) run_stage "14-qt" || exit 1 ;;
+      qt) run_stage "13-qt" || exit 1 ;;
+      verify) run_stage "14-verify" || exit 1 ;;
       *)
         log_error "未知阶段: $STAGE"
         exit 1

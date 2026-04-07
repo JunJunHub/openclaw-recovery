@@ -85,19 +85,19 @@ nano config/secrets.env  # 填入真实值
 | 阶段 | 命令 | 安装内容 | 风险等级 |
 |------|------|---------|---------|
 | 01 | `--stage system` | 系统依赖 + SSH + 中文输入法 | 🟢 低 |
-| 02 | `--stage node` | NVM + Node.js v24 | 🟢 低 |
-| 03 | `--stage chrome` | Google Chrome | 🟢 低 |
-| 04 | `--stage openclaw` | OpenClaw CLI + Serper 插件 | 🟡 中 |
-| 05 | `--stage config` | 配置文件恢复 | 🔴 高（覆盖配置）|
-| 06 | `--stage workspaces` | 工作空间初始化 | 🟢 低 |
-| 07 | `--stage verify` | 安装验证测试 | 🟢 低 |
+| 02 | `--stage github-hosts` | GitHub hosts 配置 | 🟢 低 |
+| 03 | `--stage node` | NVM + Node.js v24 | 🟢 低 |
+| 04 | `--stage chrome` | Google Chrome | 🟢 低 |
+| 05 | `--stage openclaw` | OpenClaw CLI + Serper 插件 | 🟡 中 |
+| 06 | `--stage config` | 配置文件恢复 | 🔴 高（覆盖配置）|
+| 07 | `--stage workspaces` | 工作空间初始化 | 🟢 低 |
 | 08 | `--stage dev-tools` | Claude Code + GitHub CLI | 🟡 中 |
 | 09 | `--stage file-sharing` | Samba 文件共享 | 🔴 高（修改 smb.conf）|
 | 10 | `--stage obsidian` | Obsidian AppImage | 🟢 低 |
 | 11 | `--stage python` | Python 工具 (pip, uv) | 🟢 低 |
 | 12 | `--stage golang` | Go 环境 (gvm, Go SDK) | 🟢 低 |
-| 13 | `--stage github-hosts` | GitHub hosts 配置 | 🟢 低 |
-| 14 | `--stage qt` | Qt 6.8 LTS 开发环境 | 🟢 低 |
+| 13 | `--stage qt` | Qt 6.8 LTS 开发环境 | 🟢 低 |
+| 14 | `--stage verify` | 全量验证测试 | 🟢 低 |
 
 ---
 
