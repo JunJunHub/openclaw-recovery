@@ -200,7 +200,7 @@ check_environment() {
   else
     echo "  ❌ GitHub CLI 未安装"
   fi
-  if command_exists "cc-switch" || [ -f "$HOME/Applications/CC-Switch"*.AppImage ]; then
+  if dpkg -l cc-switch 2>/dev/null | grep -q "^ii"; then
     echo "  ✅ CC Switch 已安装"
   else
     echo "  ❌ CC Switch 未安装"

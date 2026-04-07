@@ -229,10 +229,11 @@ nano config/secrets.env  # 填入真实值
 - Provider 热切换、模型管理、MCP 配置
 - WebDAV 同步、多语言支持
 
-**CC Switch 安装位置**：
-- AppImage: `~/Applications/CC-Switch-*.AppImage`
-- 启动命令: `cc-switch`
-- 桌面快捷方式: 应用菜单 → CC Switch
+**CC Switch 安装方式**：
+- 格式：deb 包（Ubuntu/Debian）
+- 安装：`sudo apt install ./CC-Switch-*.deb`
+- 自动更新：应用内支持
+- 卸载：`sudo apt remove cc-switch`
 
 ### Qt 开发环境
 
