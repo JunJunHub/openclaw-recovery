@@ -78,7 +78,7 @@ NEW_ENTRIES=""
 FAILED_DOMAINS=""
 
 for domain in "${DOMAINS[@]}"; do
-  ip=$(get_ip "$domain")
+  ip=$(get_ip "$domain") || true  # 忽略返回值，继续执行
   if [[ -n "$ip" ]]; then
     NEW_ENTRIES="${NEW_ENTRIES}${ip} ${domain}\n"
     log "✓ $domain -> $ip"

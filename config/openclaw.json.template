@@ -1,6 +1,6 @@
 {
   "meta": {
-    "lastTouchedVersion": "2026.3.23-2"
+    "lastTouchedVersion": "2026.4.1"
   },
   "env": {
     "shellEnv": {
@@ -20,7 +20,17 @@
     "executablePath": "/usr/bin/google-chrome-stable",
     "headless": false,
     "noSandbox": true,
-    "defaultProfile": "clawd"
+    "defaultProfile": "user",
+    "profiles": {
+      "user": {
+        "driver": "existing-session",
+        "attachOnly": true,
+        "color": "#00AA00"
+      },
+      "clawd": {
+        "driver": "cdp"
+      }
+    }
   },
   "auth": {
     "profiles": {
