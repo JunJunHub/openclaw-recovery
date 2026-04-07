@@ -262,6 +262,32 @@ check_environment() {
   fi
   echo ""
 
+  # Qt 环境
+  echo "【Qt 环境】"
+  if [ -d "$HOME/Qt" ]; then
+    echo "  ✅ Qt 安装目录: ~/Qt"
+    # 检查已安装版本
+    if ls "$HOME/Qt"/6.*/gcc_64/bin/qmake 2>/dev/null; then
+      local qt_version=$(ls "$HOME/Qt" | grep "^6\." | head -1)
+      echo "  ✅ Qt 版本: $qt_version"
+    fi
+  else
+    echo "  ❌ Qt 未安装"
+  fi
+  
+  if command_exists "qmake"; then
+    echo "  ✅ qmake 命令可用"
+  else
+    echo "  ❌ qmake 命令不可用"
+  fi
+  
+  if [ -f "$HOME/Qt/Tools/QtCreator/bin/qtcreator" ]; then
+    echo "  ✅ Qt Creator 已安装"
+  else
+    echo "  ❌ Qt Creator 未安装"
+  fi
+  echo ""
+
   # 文件共享
   echo "【文件共享】"
   if service_running "smbd"; then

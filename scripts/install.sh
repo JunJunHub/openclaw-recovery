@@ -75,6 +75,7 @@ while [[ $# -gt 0 ]]; do
       echo "  obsidian   - Obsidian AppImage 安装"
       echo "  python     - Python 工具 (pip, uv)"
       echo "  golang     - Go 环境 (gvm, Go SDK)"
+      echo "  qt         - Qt 开发环境 (Qt 6.8 LTS)"
       exit 0
       ;;
     *)
@@ -113,6 +114,7 @@ show_execution_plan() {
     echo "  11. python    - 安装 Python 工具 (pip, uv)"
     echo "  12. golang    - 安装 Go 环境 (gvm, Go SDK)"
     echo "  13. github-hosts - 配置 GitHub hosts (解决访问不稳定)"
+    echo "  14. qt         - 安装 Qt 6.8 LTS 开发环境"
   else
     echo "【将执行的阶段】"
     echo "  $STAGE"
@@ -203,6 +205,7 @@ main() {
     run_stage "11-python" || exit 1
     run_stage "12-golang" || exit 1
     run_stage "13-github-hosts" || exit 1
+    run_stage "14-qt" || exit 1
   elif [ -n "$STAGE" ]; then
     # 执行指定阶段
     case "$STAGE" in
@@ -219,6 +222,7 @@ main() {
       python) run_stage "11-python" || exit 1 ;;
       golang) run_stage "12-golang" || exit 1 ;;
       github-hosts) run_stage "13-github-hosts" || exit 1 ;;
+      qt) run_stage "14-qt" || exit 1 ;;
       *)
         log_error "未知阶段: $STAGE"
         exit 1

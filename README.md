@@ -96,6 +96,8 @@ nano config/secrets.env  # 填入真实值
 | 10 | `--stage obsidian` | Obsidian AppImage | 🟢 低 |
 | 11 | `--stage python` | Python 工具 (pip, uv) | 🟢 低 |
 | 12 | `--stage golang` | Go 环境 (gvm, Go SDK) | 🟢 低 |
+| 13 | `--stage github-hosts` | GitHub hosts 配置 | 🟢 低 |
+| 14 | `--stage qt` | Qt 6.8 LTS 开发环境 | 🟢 低 |
 
 ---
 
@@ -214,6 +216,33 @@ nano config/secrets.env  # 填入真实值
 |------|------|------|
 | Claude Code CLI | AI 编程助手 | dev-tools |
 | GitHub CLI | Git 命令行工具 | dev-tools |
+
+### Qt 开发环境
+
+| 组件 | 说明 | 阶段 |
+|------|------|------|
+| Qt 6.8 LTS | 长期支持版本，支持到 2029 年 | qt |
+| Qt Creator | 集成开发环境 | qt |
+| CMake | 构建工具（如未安装） | qt |
+
+**安装配置**：
+- 安装目录：`~/Qt`
+- 镜像源：中科大镜像（国内加速）
+- 组件选择：Qt 6.8.x Desktop gcc_64 + Qt Creator
+
+**环境变量**：
+```bash
+# 自动添加到 PATH
+export PATH="$HOME/Qt/6.8.x/gcc_64/bin:$PATH"
+```
+
+**创建项目示例**：
+```bash
+mkdir ~/qt-projects/hello && cd ~/qt-projects/hello
+# 创建 main.cpp 后
+cmake -B build -S .
+cmake --build build
+```
 
 ### 文件共享
 
