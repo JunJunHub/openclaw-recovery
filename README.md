@@ -82,22 +82,46 @@ nano config/secrets.env  # 填入真实值
 
 ## 安装阶段清单
 
+### 基础环境层
+
 | 阶段 | 命令 | 安装内容 | 风险等级 |
 |------|------|---------|---------|
 | 01 | `--stage system` | 系统依赖 + SSH + 中文输入法 | 🟢 低 |
 | 02 | `--stage github-hosts` | GitHub hosts 配置 | 🟢 低 |
-| 03 | `--stage node` | NVM + Node.js v24 | 🟢 低 |
-| 04 | `--stage chrome` | Google Chrome | 🟢 低 |
-| 05 | `--stage openclaw` | OpenClaw CLI + Serper 插件 | 🟡 中 |
-| 06 | `--stage config` | 配置文件恢复 | 🔴 高（覆盖配置）|
-| 07 | `--stage workspaces` | 工作空间初始化 | 🟢 低 |
-| 08 | `--stage dev-tools` | Claude Code + GitHub CLI + CC Switch | 🟡 中 |
-| 09 | `--stage file-sharing` | Samba 文件共享 | 🔴 高（修改 smb.conf）|
-| 10 | `--stage obsidian` | Obsidian AppImage | 🟢 低 |
-| 11 | `--stage python` | Python 工具 (pip, uv) | 🟢 低 |
-| 12 | `--stage golang` | Go 环境 (gvm, Go SDK) | 🟢 低 |
-| 13 | `--stage qt` | Qt 6.8 LTS 开发环境 | 🟢 低 |
-| 14 | `--stage verify` | 全量验证测试 | 🟢 低 |
+| 03 | `--stage docker` | Docker CE + Compose | 🟢 低 |
+| 04 | `--stage node` | NVM + Node.js v24 | 🟢 低 |
+| 05 | `--stage python` | Python 工具 (pip, uv) | 🟢 低 |
+| 06 | `--stage golang` | Go 环境 (gvm, Go SDK) | 🟢 低 |
+
+### OpenClaw 层
+
+| 阶段 | 命令 | 安装内容 | 风险等级 |
+|------|------|---------|---------|
+| 07 | `--stage chrome` | Google Chrome (MCP 依赖) | 🟢 低 |
+| 08 | `--stage openclaw` | OpenClaw CLI + Serper 插件 | 🟡 中 |
+| 09 | `--stage config` | 配置文件恢复 | 🔴 高（覆盖配置）|
+| 10 | `--stage workspaces` | 工作空间初始化 | 🟢 低 |
+
+### 开发工具层
+
+| 阶段 | 命令 | 安装内容 | 风险等级 |
+|------|------|---------|---------|
+| 11 | `--stage dev-tools` | Claude Code + GitHub CLI + CC Switch | 🟡 中 |
+
+### 应用层
+
+| 阶段 | 命令 | 安装内容 | 风险等级 |
+|------|------|---------|---------|
+| 12 | `--stage file-sharing` | Samba 文件共享 | 🔴 高（修改 smb.conf）|
+| 13 | `--stage obsidian` | Obsidian AppImage | 🟢 低 |
+| 14 | `--stage n8n` | N8N 工作流平台 | 🟢 低 |
+| 15 | `--stage qt` | Qt 6.8 LTS 开发环境 (10-30分钟) | 🟢 低 |
+
+### 验证层
+
+| 阶段 | 命令 | 安装内容 | 风险等级 |
+|------|------|---------|---------|
+| 16 | `--stage verify` | 全量验证测试 | 🟢 低 |
 
 ---
 
@@ -476,33 +500,30 @@ cp ~/.openclaw/openclaw.json.bak.20260324120000 ~/.openclaw/openclaw.json
 ```
 openclaw-recovery/
 ├── README.md                   # 本文档
-├── DO_NOT_TEST_HERE.md         # 生产环境警告
+├── CLAUDE.md                   # Claude Code 指导
 ├── specs/                      # 规格文档
-│   ├── 00-overview.md
-│   ├── 01-system-deps.md
-│   ├── 02-openclaw-install.md
-│   ├── 03-config-restore.md
-│   ├── 04-workspaces.md
-│   ├── 05-verification.md
-│   ├── 06-dev-tools.md
-│   └── 07-obsidian.md
+│   └── *.md
 ├── scripts/
 │   ├── install.sh              # 主入口
 │   ├── lib/
 │   │   └── common.sh           # 公共函数
 │   └── stages/
-│       ├── 01-system.sh
-│       ├── 02-node.sh
-│       ├── 03-chrome.sh
-│       ├── 04-openclaw.sh
-│       ├── 05-config.sh
-│       ├── 06-workspaces.sh
-│       ├── 07-verify.sh
-│       ├── 08-dev-tools.sh
-│       ├── 09-file-sharing.sh
-│       ├── 10-obsidian.sh
-│       ├── 11-python.sh
-│       └── 12-golang.sh
+│       ├── 01-system.sh        # 系统依赖
+│       ├── 02-github-hosts.sh  # GitHub hosts
+│       ├── 03-docker.sh        # Docker
+│       ├── 04-node.sh          # Node.js
+│       ├── 05-python.sh        # Python
+│       ├── 06-golang.sh        # Go
+│       ├── 07-chrome.sh        # Chrome
+│       ├── 08-openclaw.sh      # OpenClaw
+│       ├── 09-config.sh        # 配置恢复
+│       ├── 10-workspaces.sh    # 工作空间
+│       ├── 11-dev-tools.sh     # 开发工具
+│       ├── 12-file-sharing.sh  # 文件共享
+│       ├── 13-obsidian.sh      # Obsidian
+│       ├── 14-n8n.sh           # N8N
+│       ├── 15-qt.sh            # Qt
+│       └── 16-verify.sh        # 验证
 └── config/
     ├── openclaw.json.template  # 配置模板
     ├── secrets.env.example     # 敏感信息示例
