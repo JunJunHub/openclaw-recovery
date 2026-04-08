@@ -99,26 +99,39 @@ configure_user_permissions() {
   fi
 }
 
-# 配置 Docker 镜像加速（可选）
+# 配置 Docker 镜像加速
 configure_mirror() {
   log_step "配置 Docker 镜像加速..."
 
   local daemon_json="/etc/docker/daemon.json"
+  local backup_json="/etc/docker/daemon.json.bak.$(date +%Y%m%d%H%M%S)"
 
-  # 国内镜像源（可按需修改）
+  # 国内镜像源（支持 IPv4，避免 IPv6 连接问题）
   local mirrors='{
   "registry-mirrors": [
-    "https://docker.1ms.run",
-    "https://docker.xuanyuan.me"
+    "https://hub.rat.dev",
+    "https://docker.hlyun.org",
+    "https://mirror.ccs.tencentyun.com"
   ]
 }'
 
+  # 备份现有配置
   if [ -f "$daemon_json" ]; then
-    log_info "Docker 配置文件已存在，跳过镜像配置"
-    log_info "如需配置镜像加速，请手动编辑: $daemon_json"
-  else
-    echo "$mirrors" | sudo tee "$daemon_json" > /dev/null
-    log_info "已配置 Docker 镜像加速"
+    sudo cp "$daemon_json" "$backup_json"
+    log_info "已备份现有配置到: $backup_json"
+  fi
+
+  # 写入新配置
+  echo "$mirrors" | sudo tee "$daemon_json" > /dev/null
+  log_info "已配置 Docker 镜像加速"
+  log_info "镜像源: hub.rat.dev, docker.hlyun.org, 腾讯云"
+
+  # 重启 Docker 使配置生效
+  if systemctl is-active --quiet docker; then
+    log_info "重启 Docker 服务使配置生效..."
+    sudo systemctl restart docker
+    sleep 2
+    log_info "Docker 服务已重启"
   fi
 }
 
@@ -201,9 +214,9 @@ main() {
   install_dependencies
   add_docker_repository
   install_docker
+  start_docker_service
   configure_user_permissions
   configure_mirror
-  start_docker_service
   verify_docker
 
   show_usage_tips
