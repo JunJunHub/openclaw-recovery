@@ -293,6 +293,33 @@ check_environment() {
   fi
   echo ""
 
+  # Docker 环境
+  echo "【Docker 环境】"
+  if command_exists "docker"; then
+    local docker_version=$(docker --version 2>/dev/null | awk '{print $3}' | tr -d ',')
+    echo "  ✅ Docker: $docker_version"
+    
+    if service_running "docker"; then
+      echo "  ✅ Docker 服务运行中"
+    else
+      echo "  ⚠️  Docker 服务未运行"
+    fi
+    
+    if docker compose version &>/dev/null; then
+      local compose_version=$(docker compose version 2>/dev/null | awk '{print $4}' | tr -d ',')
+      echo "  ✅ Docker Compose: $compose_version"
+    fi
+    
+    if groups | grep -q docker; then
+      echo "  ✅ 用户在 docker 组中"
+    else
+      echo "  ⚠️  用户不在 docker 组，需要运行: sudo usermod -aG docker \$USER"
+    fi
+  else
+    echo "  ❌ Docker 未安装"
+  fi
+  echo ""
+
   # 文件共享
   echo "【文件共享】"
   if service_running "smbd"; then

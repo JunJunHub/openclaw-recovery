@@ -119,6 +119,33 @@ verify_obsidian() {
   fi
 }
 
+# 验证 Docker
+verify_docker() {
+  log_step "验证 Docker..."
+
+  if command -v docker &> /dev/null; then
+    log_info "✓ Docker: $(docker --version | awk '{print $3}' | tr -d ',')"
+
+    if systemctl is-active --quiet docker; then
+      log_info "✓ Docker 服务运行中"
+    else
+      log_warn "⚠ Docker 服务未运行"
+    fi
+
+    if docker compose version &>/dev/null; then
+      log_info "✓ Docker Compose: $(docker compose version | awk '{print $4}' | tr -d ',')"
+    fi
+
+    if groups | grep -q docker; then
+      log_info "✓ 用户在 docker 组中"
+    else
+      log_warn "⚠ 用户不在 docker 组"
+    fi
+  else
+    log_warn "⚠ Docker 未安装"
+  fi
+}
+
 # 生成报告
 generate_report() {
   echo ""
@@ -136,6 +163,7 @@ generate_report() {
   verify_config || errors=$((errors + 1))
   verify_workspaces || errors=$((errors + 1))
   verify_obsidian
+  verify_docker
 
   echo ""
   echo "========================================"

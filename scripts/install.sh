@@ -76,6 +76,7 @@ while [[ $# -gt 0 ]]; do
       echo "  python       - Python 工具 (pip, uv)"
       echo "  golang       - Go 环境 (gvm, Go SDK)"
       echo "  qt           - Qt 开发环境 (Qt 6.8 LTS)"
+      echo "  docker       - Docker 容器环境 (Docker CE)"
       echo "  verify       - 全量验证测试"
       exit 0
       ;;
@@ -115,7 +116,8 @@ show_execution_plan() {
     echo "  11. python      - 安装 Python 工具 (pip, uv)"
     echo "  12. golang      - 安装 Go 环境 (gvm, Go SDK)"
     echo "  13. qt          - 安装 Qt 6.8 LTS 开发环境 (耗时较长)"
-    echo "  14. verify      - 全量验证安装结果"
+    echo "  14. docker      - 安装 Docker 容器环境"
+    echo "  15. verify      - 全量验证安装结果"
   else
     echo "【将执行的阶段】"
     echo "  $STAGE"
@@ -206,7 +208,8 @@ main() {
     run_stage "11-python" || exit 1
     run_stage "12-golang" || exit 1
     run_stage "13-qt" || exit 1
-    run_stage "14-verify" || exit 1
+    run_stage "14-docker" || exit 1
+    run_stage "15-verify" || exit 1
   elif [ -n "$STAGE" ]; then
     # 执行指定阶段
     case "$STAGE" in
@@ -223,7 +226,8 @@ main() {
       python) run_stage "11-python" || exit 1 ;;
       golang) run_stage "12-golang" || exit 1 ;;
       qt) run_stage "13-qt" || exit 1 ;;
-      verify) run_stage "14-verify" || exit 1 ;;
+      docker) run_stage "14-docker" || exit 1 ;;
+      verify) run_stage "15-verify" || exit 1 ;;
       *)
         log_error "未知阶段: $STAGE"
         exit 1
