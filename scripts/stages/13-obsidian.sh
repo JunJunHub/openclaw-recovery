@@ -1,7 +1,7 @@
 #!/bin/bash
-# 阶段 10: Obsidian 安装
+# 阶段 13: Obsidian 安装
 
-log_info "=== 阶段 10: Obsidian 安装 ==="
+log_info "=== 阶段 13: Obsidian 安装 ==="
 
 OBSIDIAN_DIR="$HOME/Applications"
 OBSIDIAN_APPIMAGE="$OBSIDIAN_DIR/Obsidian.AppImage"

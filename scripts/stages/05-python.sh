@@ -1,7 +1,7 @@
 #!/bin/bash
-# 阶段 11: Python 工具安装
+# 阶段 5: Python 工具安装
 
-log_info "=== 阶段 11: Python 工具安装 ==="
+log_info "=== 阶段 5: Python 工具安装 ==="
 
 # 检查 Python3
 check_python() {

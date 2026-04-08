@@ -1,5 +1,5 @@
 #!/bin/bash
-# 阶段 2: Node.js 安装 (通过 NVM)
+# 阶段 4: Node.js 安装 (通过 NVM)
 
 NVM_VERSION="v0.40.1"
 # OpenClaw 推荐的 Node.js 版本

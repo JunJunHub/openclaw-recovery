@@ -1,7 +1,7 @@
 #!/bin/bash
-# 阶段 15: N8N 工作流自动化平台
+# 阶段 14: N8N 工作流自动化平台
 
-log_info "=== 阶段 15: N8N 安装 ==="
+log_info "=== 阶段 14: N8N 安装 ==="
 
 # 配置
 N8N_IMAGE="n8nio/n8n:latest"

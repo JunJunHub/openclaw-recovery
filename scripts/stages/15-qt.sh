@@ -1,7 +1,7 @@
 #!/bin/bash
-# 阶段 14: Qt 开发环境安装
+# 阶段 15: Qt 开发环境安装
 
-log_info "=== 阶段 14: Qt 开发环境安装 ==="
+log_info "=== 阶段 15: Qt 开发环境安装 ==="
 
 # 配置
 QT_VERSION="${QT_VERSION:-6.8}"  # 默认安装 Qt 6.8 LTS

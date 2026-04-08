@@ -1,5 +1,5 @@
 #!/bin/bash
-# 阶段 13: GitHub Hosts 配置
+# 阶段 2: GitHub Hosts 配置
 # 解决国内访问 GitHub 不稳定问题
 
 set -e

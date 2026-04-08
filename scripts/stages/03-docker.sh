@@ -1,7 +1,7 @@
 #!/bin/bash
-# 阶段 15: Docker 安装
+# 阶段 3: Docker 安装
 
-log_info "=== 阶段 15: Docker 安装 ==="
+log_info "=== 阶段 3: Docker 安装 ==="
 
 # 配置
 DOCKER_MIRROR="https://mirrors.aliyun.com/docker-ce"

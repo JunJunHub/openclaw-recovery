@@ -1,5 +1,5 @@
 #!/bin/bash
-# 阶段 3: Chrome 浏览器安装 (.deb 版本)
+# 阶段 7: Chrome 浏览器安装 (.deb 版本)
 
 log_step "安装 Google Chrome..."
 

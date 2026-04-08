@@ -1,7 +1,7 @@
 #!/bin/bash
-# 阶段 4: OpenClaw 安装
+# 阶段 8: OpenClaw 安装
 
-log_info "=== 阶段 4: OpenClaw 安装 ==="
+log_info "=== 阶段 8: OpenClaw 安装 ==="
 
 OPENCLAW_DIR="$HOME/.openclaw"
 

@@ -1,7 +1,7 @@
 #!/bin/bash
-# 阶段 12: Go 环境安装
+# 阶段 6: Go 环境安装
 
-log_info "=== 阶段 12: Go 环境安装 ==="
+log_info "=== 阶段 6: Go 环境安装 ==="
 
 # 检查是否已安装 go
 check_go() {

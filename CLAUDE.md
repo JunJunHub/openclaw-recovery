@@ -38,42 +38,56 @@ scripts/
 └── stages/
     ├── 01-system.sh       # System deps, SSH, Chinese input
     ├── 02-github-hosts.sh # GitHub hosts configuration
-    ├── 03-node.sh         # NVM + Node.js v24
-    ├── 04-chrome.sh       # Google Chrome
-    ├── 05-openclaw.sh     # OpenClaw CLI
-    ├── 06-config.sh       # Config file restoration
-    ├── 07-workspaces.sh   # Workspace directories
-    ├── 08-dev-tools.sh    # Claude Code, GitHub CLI, CC Switch
-    ├── 09-file-sharing.sh # Samba file sharing
-    ├── 10-obsidian.sh     # Obsidian AppImage
-    ├── 11-python.sh       # pip, uv, dev tools
-    ├── 12-golang.sh       # gvm, Go SDK
-    ├── 13-qt.sh           # Qt 6.8 LTS
-    ├── 14-docker.sh       # Docker CE
-    └── 15-verify.sh       # Verification tests
+    ├── 03-docker.sh       # Docker CE + Compose
+    ├── 04-node.sh         # NVM + Node.js v24
+    ├── 05-python.sh       # pip, uv, dev tools
+    ├── 06-golang.sh       # gvm, Go SDK
+    ├── 07-chrome.sh       # Google Chrome (MCP dependency)
+    ├── 08-openclaw.sh     # OpenClaw CLI
+    ├── 09-config.sh       # Config file restoration
+    ├── 10-workspaces.sh   # Workspace directories
+    ├── 11-dev-tools.sh    # Claude Code, GitHub CLI, CC Switch
+    ├── 12-file-sharing.sh # Samba file sharing
+    ├── 13-obsidian.sh     # Obsidian AppImage
+    ├── 14-n8n.sh          # N8N workflow platform
+    ├── 15-qt.sh           # Qt 6.8 LTS (10-30 min install)
+    └── 16-verify.sh       # Verification tests
 ```
 
 Each stage script is sourced by `install.sh` and uses functions from `common.sh`.
 
 ## Stage Reference
 
+### Layer 1: Base Environment
+
 | Stage | Command | Risk | Description |
 |-------|---------|------|-------------|
 | 01-system | `--stage system` | Low | System deps, SSH, Chinese input |
 | 02-github-hosts | `--stage github-hosts` | Low | GitHub hosts for access stability |
-| 03-node | `--stage node` | Low | NVM + Node.js v24 |
-| 04-chrome | `--stage chrome` | Low | Google Chrome |
-| 05-openclaw | `--stage openclaw` | Medium | OpenClaw CLI + Serper plugin |
-| 06-config | `--stage config` | High | Overwrites `~/.openclaw/openclaw.json` |
-| 07-workspaces | `--stage workspaces` | Low | Creates workspace directories |
-| 08-dev-tools | `--stage dev-tools` | Medium | Claude Code, GitHub CLI, CC Switch |
-| 09-file-sharing | `--stage file-sharing` | High | Modifies `/etc/samba/smb.conf` |
-| 10-obsidian | `--stage obsidian` | Low | Obsidian AppImage |
-| 11-python | `--stage python` | Low | pip, uv, pytest, jupyter |
-| 12-golang | `--stage golang` | Low | gvm, Go SDK, gopls, dlv |
-| 13-qt | `--stage qt` | Low | Qt 6.8 LTS + Qt Creator |
-| 14-docker | `--stage docker` | Low | Docker CE + Compose |
-| 15-verify | `--stage verify` | Low | Full verification tests |
+| 03-docker | `--stage docker` | Low | Docker CE + Compose |
+| 04-node | `--stage node` | Low | NVM + Node.js v24 |
+| 05-python | `--stage python` | Low | pip, uv, pytest, jupyter |
+| 06-golang | `--stage golang` | Low | gvm, Go SDK, gopls, dlv |
+
+### Layer 2: OpenClaw Core
+
+| Stage | Command | Risk | Description |
+|-------|---------|------|-------------|
+| 07-chrome | `--stage chrome` | Low | Google Chrome (MCP dependency) |
+| 08-openclaw | `--stage openclaw` | Medium | OpenClaw CLI + Serper plugin |
+| 09-config | `--stage config` | High | Overwrites `~/.openclaw/openclaw.json` |
+| 10-workspaces | `--stage workspaces` | Low | Creates workspace directories |
+
+### Layer 3: Dev Tools & Applications
+
+| Stage | Command | Risk | Description |
+|-------|---------|------|-------------|
+| 11-dev-tools | `--stage dev-tools` | Medium | Claude Code, GitHub CLI, CC Switch |
+| 12-file-sharing | `--stage file-sharing` | High | Modifies `/etc/samba/smb.conf` |
+| 13-obsidian | `--stage obsidian` | Low | Obsidian AppImage |
+| 14-n8n | `--stage n8n` | Low | N8N workflow platform (requires Docker) |
+| 15-qt | `--stage qt` | Low | Qt 6.8 LTS + Qt Creator (10-30 min) |
+| 16-verify | `--stage verify` | Low | Full verification tests |
 
 ## Configuration
 

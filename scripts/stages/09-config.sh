@@ -1,7 +1,7 @@
 #!/bin/bash
-# 阶段 5: 配置恢复
+# 阶段 9: 配置恢复
 
-log_info "=== 阶段 5: 配置恢复 ==="
+log_info "=== 阶段 9: 配置恢复 ==="
 
 OPENCLAW_DIR="$HOME/.openclaw"
 CONFIG_FILE="$OPENCLAW_DIR/openclaw.json"

@@ -1,7 +1,7 @@
 #!/bin/bash
-# 阶段 6: Workspace 恢复
+# 阶段 10: Workspace 恢复
 
-log_info "=== 阶段 6: Workspace 恢复 ==="
+log_info "=== 阶段 10: Workspace 恢复 ==="
 
 OPENCLAW_DIR="$HOME/.openclaw"
 WORKSPACES=("workspace" "workspace-thinker" "workspace-media" "workspace-monitor" "workspace-coder")

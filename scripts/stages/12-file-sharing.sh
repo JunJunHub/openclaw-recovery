@@ -1,7 +1,7 @@
 #!/bin/bash
-# 阶段 9: 文件共享配置
+# 阶段 12: 文件共享配置
 
-log_info "=== 阶段 9: 文件共享配置 ==="
+log_info "=== 阶段 12: 文件共享配置 ==="
 
 # 挂载点配置
 WIN_MOUNT_POINT="/home/$USER/mnt/win"
