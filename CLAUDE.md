@@ -103,25 +103,27 @@ The `inject_secrets()` function in `common.sh` replaces these at install time.
 | `original` | `openclaw@latest` | Default, latest features, Chrome MCP |
 | `cn` | `openclaw-cn@latest` | Community edition, built-in Feishu/DingTalk |
 
-## Important Functions (common.sh)
+## Development
+
+### Testing a Single Stage
+
+```bash
+# Test a stage in isolation (recommended for development)
+./scripts/install.sh --stage node
+./scripts/install.sh --stage python
+```
+
+### Key Functions (common.sh)
 
 - `log_info/warn/error/step()` - Colored logging
-- `check_environment()` - Comprehensive system state check
+- `check_environment()` - Comprehensive system state check (used by `--check`)
 - `inject_secrets()` - Template variable replacement
-- `show_config_diff()` - Preview config changes before overwrite
-- `confirm_overwrite()` - User confirmation for risky operations
-- `download_file()` - Download with retry logic
-- `install_apt_packages()` - Batch apt package installation
+- `show_config_diff()` + `confirm_overwrite()` - Safe config modification pattern
 
-## Risk Levels
+### Risk Levels
 
-| Stage | Risk | Reason |
-|-------|------|--------|
-| `config` | High | Overwrites `~/.openclaw/openclaw.json` |
-| `file-sharing` | High | Modifies `/etc/samba/smb.conf` |
-
-Both create backups before modifying.
+High-risk stages (`config`, `file-sharing`) automatically create backups before modifying files.
 
 ## Testing
 
-This tool is designed for **new VM environments only**. Using `--check` first is recommended to inspect current environment state without making changes.
+Designed for **new VM environments only**. Always run `--check` first to inspect environment state without making changes.

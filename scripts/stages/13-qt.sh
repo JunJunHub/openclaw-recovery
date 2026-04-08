@@ -7,7 +7,7 @@ log_info "=== 阶段 14: Qt 开发环境安装 ==="
 QT_VERSION="${QT_VERSION:-6.8}"  # 默认安装 Qt 6.8 LTS
 QT_INSTALL_DIR="${QT_INSTALL_DIR:-$HOME/Qt}"
 QT_MIRROR="https://mirrors.ustc.edu.cn/qtproject"
-QT_INSTALLER_NAME="qt-unified-linux-x64-online.run"
+QT_INSTALLER_NAME="qt-online-installer-linux-x64-online.run"
 QT_INSTALLER_URL="$QT_MIRROR/official_releases/online_installers/$QT_INSTALLER_NAME"
 MIN_DISK_SPACE_GB=15  # Qt 安装至少需要 15GB
 
@@ -75,12 +75,16 @@ install_qt_deps() {
     "libxrandr2"
     "libxcursor1"
     "libxi6"
-    "libasound2"
+    "libasound2t64"
   )
 
   log_info "安装依赖包..."
   sudo apt-get update -qq
-  sudo apt-get install -y "${deps[@]}"
+  sudo apt-get install -y "${deps[@]}" 2>/dev/null || {
+    # Ubuntu 24.04+ 使用 t64 包名，回退兼容
+    log_warn "部分包安装失败，尝试兼容模式..."
+    sudo apt-get install -y "${deps[@]//libasound2t64/libasound2}" 2>/dev/null || true
+  }
 
   log_info "Qt 依赖安装完成"
 }
@@ -89,34 +93,40 @@ install_qt_deps() {
 download_qt_installer() {
   log_step "下载 Qt 在线安装器..."
 
+  QT_INSTALLER_PATH="/tmp/qt-installer/$QT_INSTALLER_NAME"
   local download_dir="/tmp/qt-installer"
-  local installer_path="$download_dir/$QT_INSTALLER_NAME"
 
   # 清理旧文件
   rm -rf "$download_dir"
   mkdir -p "$download_dir"
 
-  # 使用国内镜像下载
-  log_info "从国内镜像下载: $QT_MIRROR"
+  # 尝试多个下载源
+  local mirrors=(
+    "$QT_MIRROR/official_releases/online_installers/$QT_INSTALLER_NAME"
+    "https://download.qt.io/official_releases/online_installers/$QT_INSTALLER_NAME"
+  )
 
-  if wget -q --show-progress -O "$installer_path" "$QT_INSTALLER_URL"; then
-    chmod +x "$installer_path"
-    log_info "安装器下载完成: $installer_path"
-    echo "$installer_path"
-    return 0
-  else
-    log_error "安装器下载失败"
-    return 1
-  fi
+  for url in "${mirrors[@]}"; do
+    log_info "尝试下载: $url"
+    if wget -q --show-progress --timeout=30 -O "$QT_INSTALLER_PATH" "$url"; then
+      chmod +x "$QT_INSTALLER_PATH"
+      log_info "安装器下载完成: $QT_INSTALLER_PATH"
+      return 0
+    fi
+    log_warn "下载失败: $url"
+  done
+
+  log_error "所有下载源均失败"
+  return 1
 }
 
 # 生成自动安装脚本
 generate_install_script() {
-  local script_path="/tmp/qt-installer/auto-install.qs"
+  QT_INSTALL_SCRIPT_PATH="/tmp/qt-installer/auto-install.qs"
 
   log_step "生成自动安装脚本..."
 
-  cat > "$script_path" << 'INSTALLSCRIPT'
+  cat > "$QT_INSTALL_SCRIPT_PATH" << 'INSTALLSCRIPT'
 // Qt 自动安装脚本
 // 安装 Qt 6.8 LTS + Qt Creator
 
@@ -184,8 +194,7 @@ Controller.prototype.FinishedPageCallback = function() {
 }
 INSTALLSCRIPT
 
-  log_info "自动安装脚本已生成: $script_path"
-  echo "$script_path"
+  log_info "自动安装脚本已生成: $QT_INSTALL_SCRIPT_PATH"
 }
 
 # 运行 Qt 安装器
@@ -220,11 +229,11 @@ show_manual_install_guide() {
   echo "如果自动安装失败，请手动执行以下步骤："
   echo ""
   echo "1. 下载安装器："
-  echo "   wget $QT_MIRROR/official_releases/online_installers/$QT_INSTALLER_NAME"
-  echo "   chmod +x $QT_INSTALLER_NAME"
+  echo "   wget https://download.qt.io/official_releases/online_installers/qt-online-installer-linux-x64-online.run"
+  echo "   chmod +x qt-online-installer-linux-x64-online.run"
   echo ""
   echo "2. 运行安装器（使用镜像加速）："
-  echo "   ./$QT_INSTALLER_NAME --mirror $QT_MIRROR"
+  echo "   ./qt-online-installer-linux-x64-online.run --mirror $QT_MIRROR"
   echo ""
   echo "3. 在安装界面选择组件："
   echo "   ✓ Qt 6.8.x → Desktop gcc_64"
@@ -243,33 +252,44 @@ show_manual_install_guide() {
 setup_qt_env() {
   log_step "配置 Qt 环境变量..."
 
-  local qt_bin_dir=""
+  local bashrc="$HOME/.bashrc"
 
-  # 查找 Qt 安装目录
+  # 检查是否已配置
+  if grep -q "Qt/6\." "$bashrc" 2>/dev/null; then
+    log_info "Qt PATH 已配置"
+    return 0
+  fi
+
+  # 构建所有需要添加的 PATH
+  local qt_paths=()
+
+  # Qt SDK bin
   for dir in "$QT_INSTALL_DIR"/6.*/gcc_64/bin; do
     if [ -d "$dir" ]; then
-      qt_bin_dir="$dir"
+      qt_paths+=("$dir")
       break
     fi
   done
 
-  if [ -z "$qt_bin_dir" ]; then
+  # Qt Tools (CMake, Ninja 等)
+  [ -d "$QT_INSTALL_DIR/Tools/CMake/bin" ] && qt_paths+=("$QT_INSTALL_DIR/Tools/CMake/bin")
+  [ -d "$QT_INSTALL_DIR/Tools/Ninja/bin" ] && qt_paths+=("$QT_INSTALL_DIR/Tools/Ninja/bin")
+
+  if [ ${#qt_paths[@]} -eq 0 ]; then
     log_warn "未找到 Qt 安装目录，跳过环境变量配置"
     return 1
   fi
 
-  # 添加到 PATH
-  local bashrc="$HOME/.bashrc"
-  local qt_path_line="export PATH=\"$qt_bin_dir:\$PATH\""
+  # 添加到 bashrc
+  echo "" >> "$bashrc"
+  echo "# Qt 6" >> "$bashrc"
 
-  if grep -q "Qt/6\." "$bashrc" 2>/dev/null; then
-    log_info "Qt PATH 已配置"
-  else
-    echo "" >> "$bashrc"
-    echo "# Qt 6" >> "$bashrc"
-    echo "$qt_path_line" >> "$bashrc"
-    log_info "Qt PATH 已添加到 ~/.bashrc"
-  fi
+  for path in "${qt_paths[@]}"; do
+    echo "export PATH=\"$path:\$PATH\"" >> "$bashrc"
+    log_info "添加到 PATH: $path"
+  done
+
+  log_info "Qt PATH 已添加到 ~/.bashrc"
 
   # 添加 Qt Creator 快捷方式
   if [ -f "$QT_INSTALL_DIR/Tools/QtCreator/bin/qtcreator" ]; then
@@ -349,7 +369,9 @@ show_qt_info() {
     echo "  Desktop gcc_64"
     echo ""
     echo "【环境变量】"
-    echo "  PATH 包含: $QT_INSTALL_DIR/$qt_version/gcc_64/bin"
+    echo "  Qt SDK: $QT_INSTALL_DIR/$qt_version/gcc_64/bin"
+    [ -d "$QT_INSTALL_DIR/Tools/CMake/bin" ] && echo "  CMake: $QT_INSTALL_DIR/Tools/CMake/bin"
+    [ -d "$QT_INSTALL_DIR/Tools/Ninja/bin" ] && echo "  Ninja: $QT_INSTALL_DIR/Tools/Ninja/bin"
     echo ""
     echo "【创建项目】"
     echo "  mkdir ~/qt-projects && cd ~/qt-projects"
@@ -403,24 +425,21 @@ main() {
   install_qt_deps
 
   # 下载安装器
-  local installer_path
-  installer_path=$(download_qt_installer)
-  if [ $? -ne 0 ]; then
+  if ! download_qt_installer; then
     log_error "安装器下载失败"
     show_manual_install_guide
     return 1
   fi
 
   # 生成自动安装脚本
-  local script_path
-  script_path=$(generate_install_script)
+  generate_install_script
 
   # 运行安装器
   log_info "正在安装 Qt，请稍候..."
   log_warn "安装过程可能需要 10-30 分钟，取决于网络速度"
 
   # 尝试自动安装
-  if run_qt_installer "$installer_path" "$script_path"; then
+  if run_qt_installer "$QT_INSTALLER_PATH" "$QT_INSTALL_SCRIPT_PATH"; then
     log_info "Qt 安装完成"
   else
     log_warn "自动安装失败，请手动安装"
