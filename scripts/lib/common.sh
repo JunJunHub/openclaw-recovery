@@ -320,6 +320,27 @@ check_environment() {
   fi
   echo ""
 
+  # N8N 环境
+  echo "【N8N 工作流平台】"
+  if command_exists "docker" && docker ps &>/dev/null; then
+    if docker ps --format '{{.Names}}' | grep -q "^n8n$"; then
+      local n8n_port=$(docker port n8n 5678 2>/dev/null | cut -d: -f1)
+      echo "  ✅ N8N 容器运行中"
+      echo "  ✅ 访问地址: http://localhost:${n8n_port:-5678}"
+    elif docker ps -a --format '{{.Names}}' | grep -q "^n8n$"; then
+      echo "  ⚠️  N8N 容器已停止"
+    else
+      echo "  ❌ N8N 容器未创建"
+    fi
+    
+    if [ -d "$HOME/.n8n" ]; then
+      echo "  ✅ 数据目录: ~/.n8n"
+    fi
+  else
+    echo "  ❌ Docker 未安装或无权限"
+  fi
+  echo ""
+
   # 文件共享
   echo "【文件共享】"
   if service_running "smbd"; then

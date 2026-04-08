@@ -1,5 +1,5 @@
 #!/bin/bash
-# 阶段 7: 验证测试
+# 阶段 16: 验证测试
 
 log_info "=== 阶段 7: 验证测试 ==="
 
@@ -146,6 +146,36 @@ verify_docker() {
   fi
 }
 
+# 验证 N8N
+verify_n8n() {
+  log_step "验证 N8N..."
+
+  if command -v docker &> /dev/null && docker info &>/dev/null; then
+    # 检查容器状态
+    if docker ps --format '{{.Names}}' | grep -q "^n8n$"; then
+      log_info "✓ N8N 容器运行中"
+      local n8n_port=$(docker port n8n 5678 2>/dev/null | cut -d: -f1)
+      log_info "✓ 访问地址: http://localhost:${n8n_port:-5678}"
+    elif docker ps -a --format '{{.Names}}' | grep -q "^n8n$"; then
+      log_warn "⚠ N8N 容器已停止"
+    else
+      log_warn "⚠ N8N 容器未创建"
+    fi
+
+    # 检查数据目录
+    if [ -d "$HOME/.n8n" ]; then
+      log_info "✓ N8N 数据目录存在: ~/.n8n"
+    fi
+
+    # 检查镜像
+    if docker images --format '{{.Repository}}:{{.Tag}}' | grep -q "n8nio/n8n"; then
+      log_info "✓ N8N 镜像已拉取"
+    fi
+  else
+    log_warn "⚠ Docker 未安装或无权限，跳过 N8N 验证"
+  fi
+}
+
 # 生成报告
 generate_report() {
   echo ""
@@ -164,6 +194,7 @@ generate_report() {
   verify_workspaces || errors=$((errors + 1))
   verify_obsidian
   verify_docker
+  verify_n8n
 
   echo ""
   echo "========================================"

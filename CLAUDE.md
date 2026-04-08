@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-OpenClaw Recovery is a one-click recovery tool for quickly deploying OpenClaw and related development environments in new Ubuntu VMs. It installs system dependencies, Node.js, Chrome, OpenClaw CLI, Python tools, Go environment, and various desktop applications.
+OpenClaw Recovery is a one-click recovery tool for quickly deploying OpenClaw and related development environments in new Ubuntu VMs. It installs system dependencies, Node.js, Chrome, OpenClaw CLI, Python tools, Go environment, Qt, Docker, and various desktop applications.
 
 ## Key Commands
 
@@ -21,6 +21,9 @@ OpenClaw Recovery is a one-click recovery tool for quickly deploying OpenClaw an
 # OpenClaw version selection
 ./scripts/install.sh --all --version original  # default
 ./scripts/install.sh --all --version cn        # community edition
+
+# Interactive secrets input
+./scripts/install.sh --all --interactive
 ```
 
 ## Architecture
@@ -33,21 +36,44 @@ scripts/
 ├── lib/
 │   └── common.sh       # Shared functions (logging, checks, secret injection)
 └── stages/
-    ├── 01-system.sh    # System deps, SSH, Chinese input
-    ├── 02-node.sh      # NVM + Node.js v24
-    ├── 03-chrome.sh    # Google Chrome
-    ├── 04-openclaw.sh  # OpenClaw CLI
-    ├── 05-config.sh    # Config file restoration (high risk)
-    ├── 06-workspaces.sh
-    ├── 07-verify.sh
-    ├── 08-dev-tools.sh # Claude Code, GitHub CLI
-    ├── 09-file-sharing.sh  # Samba (high risk)
-    ├── 10-obsidian.sh
-    ├── 11-python.sh    # pip, uv, dev tools
-    └── 12-golang.sh    # gvm, Go SDK
+    ├── 01-system.sh       # System deps, SSH, Chinese input
+    ├── 02-github-hosts.sh # GitHub hosts configuration
+    ├── 03-node.sh         # NVM + Node.js v24
+    ├── 04-chrome.sh       # Google Chrome
+    ├── 05-openclaw.sh     # OpenClaw CLI
+    ├── 06-config.sh       # Config file restoration
+    ├── 07-workspaces.sh   # Workspace directories
+    ├── 08-dev-tools.sh    # Claude Code, GitHub CLI, CC Switch
+    ├── 09-file-sharing.sh # Samba file sharing
+    ├── 10-obsidian.sh     # Obsidian AppImage
+    ├── 11-python.sh       # pip, uv, dev tools
+    ├── 12-golang.sh       # gvm, Go SDK
+    ├── 13-qt.sh           # Qt 6.8 LTS
+    ├── 14-docker.sh       # Docker CE
+    └── 15-verify.sh       # Verification tests
 ```
 
 Each stage script is sourced by `install.sh` and uses functions from `common.sh`.
+
+## Stage Reference
+
+| Stage | Command | Risk | Description |
+|-------|---------|------|-------------|
+| 01-system | `--stage system` | Low | System deps, SSH, Chinese input |
+| 02-github-hosts | `--stage github-hosts` | Low | GitHub hosts for access stability |
+| 03-node | `--stage node` | Low | NVM + Node.js v24 |
+| 04-chrome | `--stage chrome` | Low | Google Chrome |
+| 05-openclaw | `--stage openclaw` | Medium | OpenClaw CLI + Serper plugin |
+| 06-config | `--stage config` | High | Overwrites `~/.openclaw/openclaw.json` |
+| 07-workspaces | `--stage workspaces` | Low | Creates workspace directories |
+| 08-dev-tools | `--stage dev-tools` | Medium | Claude Code, GitHub CLI, CC Switch |
+| 09-file-sharing | `--stage file-sharing` | High | Modifies `/etc/samba/smb.conf` |
+| 10-obsidian | `--stage obsidian` | Low | Obsidian AppImage |
+| 11-python | `--stage python` | Low | pip, uv, pytest, jupyter |
+| 12-golang | `--stage golang` | Low | gvm, Go SDK, gopls, dlv |
+| 13-qt | `--stage qt` | Low | Qt 6.8 LTS + Qt Creator |
+| 14-docker | `--stage docker` | Low | Docker CE + Compose |
+| 15-verify | `--stage verify` | Low | Full verification tests |
 
 ## Configuration
 
@@ -84,6 +110,8 @@ The `inject_secrets()` function in `common.sh` replaces these at install time.
 - `inject_secrets()` - Template variable replacement
 - `show_config_diff()` - Preview config changes before overwrite
 - `confirm_overwrite()` - User confirmation for risky operations
+- `download_file()` - Download with retry logic
+- `install_apt_packages()` - Batch apt package installation
 
 ## Risk Levels
 
