@@ -320,6 +320,16 @@ EOF
     log_info "Qt Creator 桌面快捷方式已创建"
   fi
 
+  # 为 Qt MaintenanceTool 添加国内镜像参数
+  local maintenance_tool_desktop="$HOME/.local/share/applications/Qt-MaintenanceTool.desktop"
+  if [ -f "$maintenance_tool_desktop" ]; then
+    # 检查是否已添加镜像参数
+    if ! grep -q "--mirror" "$maintenance_tool_desktop"; then
+      sed -i 's|Exec=/home/[^/]*/Qt/MaintenanceTool|& --mirror https://mirrors.ustc.edu.cn/qtproject|' "$maintenance_tool_desktop"
+      log_info "Qt MaintenanceTool 已配置国内镜像"
+    fi
+  fi
+
   return 0
 }
 
