@@ -63,6 +63,7 @@ install_qt_deps() {
     "build-essential"
     "libgl1-mesa-dev"
     "libxcb-xinerama0-dev"
+    "libxcb-cursor0"      # Qt xcb 平台插件必需
     "libxkbcommon-x11-dev"
     "libx11-xcb-dev"
     "libglu1-mesa-dev"
