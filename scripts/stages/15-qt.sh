@@ -292,10 +292,16 @@ setup_qt_env() {
 
   log_info "Qt PATH 已添加到 ~/.bashrc"
 
-  # 添加 Qt Creator 快捷方式
+  # 添加 Qt Creator 快捷方式（仅当不存在时）
   if [ -f "$QT_INSTALL_DIR/Tools/QtCreator/bin/qtcreator" ]; then
     local qtcreator_path="$QT_INSTALL_DIR/Tools/QtCreator/bin/qtcreator"
     local desktop_file="$HOME/.local/share/applications/qtcreator.desktop"
+
+    # 检查是否已有 Qt Creator 快捷方式（Qt 安装器会自动创建）
+    if ls "$HOME/.local/share/applications/"*qtcreator*.desktop 1>/dev/null 2>&1; then
+      log_info "Qt Creator 快捷方式已存在，跳过创建"
+      return 0
+    fi
 
     mkdir -p "$(dirname "$desktop_file")"
 
