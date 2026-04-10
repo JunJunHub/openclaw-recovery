@@ -291,6 +291,7 @@ setup_qt_env() {
   done
 
   # 设置 Qt6_DIR 环境变量（CMake 查找 Qt 所需）
+  # Qt5 用户请手动设置: export Qt5_DIR="$HOME/Qt/5.15.x/gcc_64/lib/cmake/Qt5"
   local qt_cmake_dir=""
   for dir in "$QT_INSTALL_DIR"/6.*/gcc_64/lib/cmake/Qt6; do
     if [ -d "$dir" ]; then
@@ -303,6 +304,9 @@ setup_qt_env() {
     echo "export Qt6_DIR=\"$qt_cmake_dir\"" >> "$bashrc"
     log_info "设置 Qt6_DIR: $qt_cmake_dir"
   fi
+
+  # Qt5 兼容说明（如需 Qt5，请取消注释并修改版本号）
+  # echo "# export Qt5_DIR=\"\$HOME/Qt/5.15.2/gcc_64/lib/cmake/Qt5\"" >> "$bashrc"
 
   log_info "Qt PATH 已添加到 ~/.bashrc"
 
