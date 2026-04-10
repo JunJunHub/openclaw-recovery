@@ -290,6 +290,20 @@ setup_qt_env() {
     log_info "添加到 PATH: $path"
   done
 
+  # 设置 Qt6_DIR 环境变量（CMake 查找 Qt 所需）
+  local qt_cmake_dir=""
+  for dir in "$QT_INSTALL_DIR"/6.*/gcc_64/lib/cmake/Qt6; do
+    if [ -d "$dir" ]; then
+      qt_cmake_dir="$dir"
+      break
+    fi
+  done
+
+  if [ -n "$qt_cmake_dir" ]; then
+    echo "export Qt6_DIR=\"$qt_cmake_dir\"" >> "$bashrc"
+    log_info "设置 Qt6_DIR: $qt_cmake_dir"
+  fi
+
   log_info "Qt PATH 已添加到 ~/.bashrc"
 
   # 添加 Qt Creator 快捷方式（仅当不存在时）
