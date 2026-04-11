@@ -229,6 +229,13 @@ verify_dev_tools() {
     log_warn "⚠ Claude Code CLI 未安装"
   fi
 
+  # Codex CLI
+  if command -v codex &> /dev/null; then
+    log_info "✓ Codex CLI: $(codex --version 2>/dev/null || echo 'installed')"
+  else
+    log_warn "⚠ Codex CLI 未安装"
+  fi
+
   # GitHub CLI
   if command -v gh &> /dev/null; then
     log_info "✓ GitHub CLI: $(gh --version | head -1 | awk '{print $3}')"

@@ -106,7 +106,7 @@ nano config/secrets.env  # 填入真实值
 
 | 阶段 | 命令 | 安装内容 | 风险等级 |
 |------|------|---------|---------|
-| 11 | `--stage dev-tools` | Claude Code + GitHub CLI + CC Switch | 🟡 中 |
+| 11 | `--stage dev-tools` | Claude Code + Codex CLI + GitHub CLI + CC Switch | 🟡 中 |
 
 ### 应用层
 
@@ -239,6 +239,7 @@ nano config/secrets.env  # 填入真实值
 | 工具 | 说明 | 阶段 |
 |------|------|------|
 | Claude Code CLI | AI 编程助手 | dev-tools |
+| Codex CLI | OpenAI AI 编程助手 | dev-tools |
 | GitHub CLI | Git 命令行工具 | dev-tools |
 | CC Switch | AI 编程工具管理器 | dev-tools |
 

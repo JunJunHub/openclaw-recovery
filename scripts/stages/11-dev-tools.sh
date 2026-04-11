@@ -50,6 +50,39 @@ install_claude_code() {
   fi
 }
 
+# 安装 Codex CLI
+install_codex_cli() {
+  log_step "安装 Codex CLI (OpenAI)..."
+
+  # 检查是否已安装
+  if command_exists codex; then
+    local current_version=$(codex --version 2>/dev/null || echo "unknown")
+    log_info "Codex CLI 已安装: $current_version"
+
+    read -p "是否重新安装？(y/N): " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+      return 0
+    fi
+
+    npm uninstall -g @openai/codex
+  fi
+
+  # 使用国内镜像安装
+  log_info "安装 @openai/codex (使用 npmmirror 镜像)..."
+  npm install -g @openai/codex --registry=https://registry.npmmirror.com
+
+  # 验证
+  if command_exists codex; then
+    log_info "Codex CLI 安装成功: $(codex --version 2>/dev/null || echo 'installed')"
+    log_info "  启动命令: codex"
+    log_info "  认证方式: ChatGPT 账号登录 或 API Key"
+    log_info "  配置文件: ~/.codex/config.toml"
+  else
+    log_warn "Codex CLI 安装可能失败，请手动检查"
+  fi
+}
+
 # 安装其他编程工具
 install_dev_tools() {
   log_step "安装其他编程工具..."
@@ -120,6 +153,7 @@ install_cc_switch() {
 main() {
   load_nvm
   install_claude_code
+  install_codex_cli
   install_dev_tools
   install_cc_switch
 
